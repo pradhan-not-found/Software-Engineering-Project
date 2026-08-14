@@ -1,0 +1,151 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{helvet} % Modern sans-serif corporate font
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage{geometry}
+\geometry{a4paper, margin=1.2in}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, backgrounds, shadows, calc}
+\usepackage{fontawesome5} % For professional icons
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{xcolor}
+\usepackage{setspace}
+\usepackage{array}
+\usepackage{microtype} % Improves typography
+
+% Corporate Color Palette
+\definecolor{primary}{RGB}{10, 37, 64}     % Deep Navy
+\definecolor{secondary}{RGB}{99, 115, 129} % Slate Gray
+\definecolor{accent}{RGB}{0, 112, 243}     % Electric Blue
+\definecolor{lightgray}{RGB}{248, 249, 250}% Off-white background
+
+\titleformat{\section}{\Large\bfseries\color{primary}}{\thesection}{1em}{}[{\titlerule[0.8pt]}]
+\titleformat{\subsection}{\large\bfseries\color{secondary}}{\thesubsection}{1em}{}
+
+\begin{document}
+
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+    
+    {\Huge \textbf{\color{primary}Software Personal Management System}\par}
+    \vspace{0.5cm}
+    {\Large \textbf{\color{secondary}Project Overview \& Architecture Document}\par}
+    
+    \vspace{2.5cm}
+    
+    \begin{tikzpicture}
+        \node[align=center, draw=accent, thick, fill=accent!5, rounded corners=8pt, inner sep=15pt, drop shadow={opacity=0.1}] {
+            \Large \textbf{\color{primary}Team Magnum} \\[0.3cm]
+            \normalsize Computer Science \& Engineering \\[0.1cm]
+            \normalsize Adamas University
+        };
+    \end{tikzpicture}
+    
+    \vspace{2cm}
+    
+    \begin{center}
+    \renewcommand{\arraystretch}{1.8}
+    \begin{tabular}{>{\bfseries\color{primary}}l l}
+        Team Leader: & Souradeep Pradhan \\
+        Frontend Developer: & Srijit Paul \\
+        Backend Developer: & Aniruddha Das \\
+        Data Analysts: & Asmita Mishra, Anisha Dan \\
+        Database Manager: & Soubhik Dutta \\
+    \end{tabular}
+    \end{center}
+    
+    \vfill
+    {\large \color{secondary} \today\par}
+\end{titlepage}
+
+\setstretch{1.2}
+
+\section{Executive Summary}
+The Software Personal Management System aims to pioneer a transformative ``Citizen Operating System''---a unified, AI-driven digital architecture designed to dismantle the barriers between personal productivity, professional management, and civic utility. By consolidating fragmented third-party tools into a single, secure command center, the project seeks to restore institutional trust and operational agency for every citizen. The system leverages autonomous AI agents to proactively manage complex workflows, provides inclusive multilingual and voice-guided interfaces to bridge the digital literacy gap, and establishes an immutable, transparent framework for real-time service tracking. Ultimately, this initiative strives to transition the digital experience from a state of chaotic fragmentation to one of radical simplicity and empowerment.
+
+\section{Problem Statement}
+In the current digital ecosystem, users face significant cognitive, financial, and operational burdens due to the extreme fragmentation of their digital tools. The lack of a cohesive personal management framework introduces several real-world problems:
+
+\begin{itemize}
+    \item \textbf{\color{primary}Data Fragmentation \& Cognitive Overload:} Users are forced to manually transfer information across a dozen disconnected apps. This constant context-switching destroys productivity and causes critical information to be lost in silos.
+    \item \textbf{\color{primary}Privacy Risks \& Lack of Data Ownership:} The reliance on proprietary third-party software means user data is constantly mined and monetized by tech corporations. Citizens lack a private, sovereign digital space.
+    \item \textbf{\color{primary}SaaS Subscription Fatigue:} Maintaining separate premium subscriptions for task management, personal finance, health tracking, and scheduling imposes a heavy, compounding financial burden.
+    \item \textbf{\color{primary}Inefficient Workflows:} The absence of cross-platform automation forces users into repetitive ``digital janitorial work''---wasting countless hours each week manually copying events and logging data.
+    \item \textbf{\color{primary}Systemic Opacity in Civic Interactions:} When interacting with government portals, citizens face outdated, manual interfaces without a unified dashboard to track civic requests, leading to a trust deficit.
+\end{itemize}
+
+\newpage
+\section{System Context Architecture}
+The Context Diagram illustrates the high-level interaction between external entities and the core Citizen OS.
+
+\vspace{1cm}
+\begin{center}
+\begin{tikzpicture}[
+    card/.style={rectangle, draw=black!15, thick, fill=white, text width=4cm, align=center, rounded corners=6pt, minimum height=2cm, drop shadow={opacity=0.08}},
+    systemcard/.style={rectangle, draw=accent, thick, fill=accent!5, text width=4.5cm, align=center, rounded corners=10pt, minimum height=6cm, drop shadow={opacity=0.15}},
+    arrow/.style={thick, ->, >=stealth, draw=secondary, shorten >=3pt, shorten <=3pt},
+    lbl/.style={font=\footnotesize, text=primary, align=center, fill=white, inner sep=3pt}
+]
+
+% System
+\node (system) at (0,0) [systemcard] {\Huge\color{accent}\faCloud\\[0.3cm]\Large\textbf{\color{primary}Citizen OS}\\[0.2cm]\normalsize Core Management\\System};
+
+% Entities
+\node (citizen) at (-7, 2.5) [card] {\Large\color{accent}\faUsers\\[0.1cm]\normalsize\textbf{Citizens \& Users}\\(Elderly, Youth)};
+\node (business) at (-7, -2.5) [card] {\Large\color{accent}\faBuilding\\[0.1cm]\normalsize\textbf{Small Businesses}\\\& Professionals};
+\node (gov) at (7, 2.5) [card] {\Large\color{accent}\faLandmark\\[0.1cm]\normalsize\textbf{Government Portals}\\\& Civic APIs};
+\node (thirdparty) at (7, -2.5) [card] {\Large\color{accent}\faCogs\\[0.1cm]\normalsize\textbf{Third-Party Tools}\\(Calendar, Finance)};
+
+% Arrows (Perfectly Horizontal)
+\draw [arrow, <->] (citizen.east) -- node[lbl] {Requests \& Status} (system.west |- citizen.east);
+\draw [arrow, <->] (business.east) -- node[lbl] {Workflows \& Data} (system.west |- business.east);
+\draw [arrow, <->] (system.east |- gov.west) -- node[lbl] {Service APIs} (gov.west);
+\draw [arrow, <->] (system.east |- thirdparty.west) -- node[lbl] {Integrations} (thirdparty.west);
+
+\end{tikzpicture}
+\end{center}
+
+\vspace{1cm}
+\section{Internal System Architecture}
+The Architecture Diagram details the internal modular design of the system, highlighting presentation, logic, and data layers supported by autonomous AI agents.
+
+\vspace{1cm}
+\begin{center}
+\begin{tikzpicture}[
+    box/.style={rectangle, draw=black!15, thick, fill=white, text width=5.5cm, align=center, rounded corners=6pt, minimum height=2cm, drop shadow={opacity=0.08}},
+    layerbox/.style={rectangle, draw=secondary!30, thick, dashed, inner sep=0.6cm, rounded corners=12pt, fill=lightgray},
+    arrow/.style={thick, ->, >=stealth, draw=secondary, shorten >=3pt, shorten <=3pt}
+]
+
+% Presentation Layer
+\node (ui) at (0, 7.5) [box] {\Large\color{accent}\faDesktop\\[0.1cm]\normalsize\textbf{Presentation Layer}\\Multilingual UI, Voice Guide};
+
+% Application Layer Nodes
+\node (api) at (0, 4) [box] {\Large\color{accent}\faNetworkWired\\[0.1cm]\normalsize\textbf{API Gateway}\\Request Routing, Auth};
+\node (agents) at (-4, 0.5) [box] {\Large\color{accent}\faRobot\\[0.1cm]\normalsize\textbf{AI Agents Engine}\\Workflow Automation, NLP};
+\node (logic) at (4, 0.5) [box] {\Large\color{accent}\faServer\\[0.1cm]\normalsize\textbf{Business Logic}\\Service Tracking, Integrations};
+
+% Data Layer Node
+\node (db) at (0, -3.5) [box] {\Large\color{accent}\faDatabase\\[0.1cm]\normalsize\textbf{Data Layer}\\Immutable Records DB, Caching};
+
+% Grouping
+\begin{scope}[on background layer]
+    \node (app_layer) [layerbox, fit=(api)(agents)(logic)] {};
+    \node[anchor=south west, font=\sffamily\bfseries\color{secondary}] at (app_layer.north west) {Application Layer};
+\end{scope}
+
+% Connections
+\draw [arrow, <->] (ui.south) -- (api.north);
+\draw [arrow, <->] (api.south) -- +(0,-0.7) -| (agents.north);
+\draw [arrow, <->] (api.south) -- +(0,-0.7) -| (logic.north);
+\draw [arrow, <->] (agents.east) -- node[font=\footnotesize, fill=lightgray, inner sep=4pt] {\color{secondary}Internal Bus} (logic.west);
+\draw [arrow, <->] (agents.south) -- +(0,-0.7) -| ([xshift=-1.5cm]db.north);
+\draw [arrow, <->] (logic.south) -- +(0,-0.7) -| ([xshift=1.5cm]db.north);
+
+\end{tikzpicture}
+\end{center}
+
+\end{document}
