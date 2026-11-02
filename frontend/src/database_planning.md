@@ -84,29 +84,27 @@ An internal Domain Event Bus listening to transactional events:
 
 ## 4. Entity-Relationship Schema Architecture
 
-```mermaid
-erDiagram
-    DEPARTMENT ||--o{ EMPLOYEE_PROFILE : "has"
-    EMPLOYEE_PROFILE ||--o{ EMPLOYEE_PROFILE : "manages"
-    USER ||--|| EMPLOYEE_PROFILE : "belongs to"
-    
-    EMPLOYEE_PROFILE ||--o{ ATTENDANCE : "logs"
-    EMPLOYEE_PROFILE ||--o{ LEAVE_BALANCE : "holds"
-    EMPLOYEE_PROFILE ||--o{ LEAVE_REQUEST : "submits"
-    EMPLOYEE_PROFILE ||--o{ SALARY_STRUCTURE : "has"
-    EMPLOYEE_PROFILE ||--o{ PAYROLL_RECORD : "receives"
-    
-    PROJECT ||--o{ KANBAN_BOARD : "contains"
-    KANBAN_BOARD ||--o{ BOARD_COLUMN : "contains"
-    BOARD_COLUMN ||--o{ TASK : "contains"
-    EMPLOYEE_PROFILE ||--o{ TASK_ASSIGNEE : "assigned to"
-    TASK ||--o{ TASK_ASSIGNEE : "has"
-    
-    EMPLOYEE_PROFILE ||--o{ PERFORMANCE_REVIEW : "reviewed"
-    TASK ||--o{ PERFORMANCE_METRIC : "aggregates into"
-    
-    USER ||--o{ AUDIT_LOG : "triggers"
-    USER ||--o{ NOTIFICATION : "receives"
+```text
+[DEPARTMENT] 1 ──── ∞ [EMPLOYEE_PROFILE] (has)
+[EMPLOYEE_PROFILE] 1 ──── ∞ [EMPLOYEE_PROFILE] (manages hierarchy)
+[USER] 1 ──── 1 [EMPLOYEE_PROFILE] (belongs to)
+
+[EMPLOYEE_PROFILE] 1 ──── ∞ [ATTENDANCE] (logs)
+[EMPLOYEE_PROFILE] 1 ──── ∞ [LEAVE_BALANCE] (holds)
+[EMPLOYEE_PROFILE] 1 ──── ∞ [LEAVE_REQUEST] (submits)
+[EMPLOYEE_PROFILE] 1 ──── ∞ [SALARY_STRUCTURE] (has)
+[EMPLOYEE_PROFILE] 1 ──── ∞ [PAYROLL_RECORD] (receives)
+
+[PROJECT] 1 ──── ∞ [KANBAN_BOARD] (contains)
+[KANBAN_BOARD] 1 ──── ∞ [BOARD_COLUMN] (contains)
+[BOARD_COLUMN] 1 ──── ∞ [TASK] (contains)
+[TASK] 1 ──── ∞ [TASK_ASSIGNEE] ∞ ──── 1 [EMPLOYEE_PROFILE] (assigned)
+
+[EMPLOYEE_PROFILE] 1 ──── ∞ [PERFORMANCE_REVIEW] (reviewed)
+[TASK] ∞ ──── 1 [PERFORMANCE_METRIC] (aggregates into)
+
+[USER] 1 ──── ∞ [AUDIT_LOG] (triggers)
+[USER] 1 ──── ∞ [NOTIFICATION] (receives)
 ```
 
 ### Module 1: Identity, Organization & Access Control

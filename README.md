@@ -24,9 +24,8 @@
 2. [Team Members & Stakeholders](#-team-members--stakeholders)
 3. [Architecture & Diagrammatic Flows](#-architecture--diagrammatic-flows)
    - [System Context & Architecture Flow](#1-system-context--architecture-flow)
-   - [Repository & File Organization Flow](#2-repository--file-organization-flow)
-   - [Software User Journey Flow](#3-software-user-journey-flow)
-   - [Connected Wedge — Reactive Event Flow](#4-connected-wedge--reactive-event-flow)
+   - [Software User Journey Flow](#2-software-user-journey-flow)
+   - [Connected Wedge — Reactive Event Flow](#3-connected-wedge--reactive-event-flow)
 4. [Feature Breakdown](#-feature-breakdown)
    - [Core Common HR Features (Table Stakes)](#41-core-common-hr-features-table-stakes)
    - [Extra & Connected Differentiator Features (The Wedge)](#42-extra--connected-differentiator-features-the-wedge)
@@ -69,168 +68,122 @@ Developed by **Team Magnum**, Department of Computer Science & Engineering, **Ad
 
 ### 1. System Context & Architecture Flow
 
-```mermaid
-flowchart TB
-    subgraph Users["System Actors & Roles"]
-        Admin["HR Admin / Super Admin"]
-        Manager["Department Manager"]
-        Employee["Employee"]
-    end
-
-    subgraph Client["Presentation Layer (Next.js 14 + Tailwind CSS)"]
-        LP["Landing Page (/)"]
-        AuthViews["Auth Portal (/login, /signup)"]
-        AdminHub["Admin Workspace (/admin)
-        • Directory & Onboarding
-        • Leave Approval Queue
-        • Payroll & Tax Breakdown
-        • Performance & Access Control"]
-        EmployeeHub["Employee Portal (/employee)
-        • Personal Dashboard
-        • Tasks (List & Kanban Views)
-        • Leave Request & Quotas
-        • My Profile & Reporting Hierarchy"]
-    end
-
-    subgraph Engine["Connected Business Engine & Event Bus"]
-        AuthGate["RBAC Access & Route Protection"]
-        ConnEngine["Connected Logic Engine
-        • Auto-generate Onboarding Boards
-        • Auto-flag Delayed Tasks on Approved Leave
-        • Inherit Task Permissions from Org Chart
-        • Prepopulate Reviews with Velocity Metrics"]
-    end
-
-    subgraph DataLayer["Data & Persistence Layer"]
-        Prisma["Prisma ORM / Data Access Layer (DAL)"]
-        Postgres[(PostgreSQL Database
-        • Users & Employee Profiles
-        • Departments & Org Hierarchy
-        • Attendance & Leave Quotas
-        • Tasks, Boards & Payroll Records)]
-    end
-
-    Users --> Client
-    LP --> AuthViews
-    AuthViews --> AuthGate
-    AuthGate --> AdminHub
-    AuthGate --> EmployeeHub
-    AdminHub & EmployeeHub --> ConnEngine
-    ConnEngine --> Prisma
-    Prisma --> Postgres
+```text
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                               SYSTEM ACTORS & ROLES                                    │
+│       [ HR Admin / Super Admin ]     [ Department Manager ]     [ Employee ]           │
+└───────────────────────────────────────────┬────────────────────────────────────────────┘
+                                            │
+                                            ▼
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                   PRESENTATION LAYER (Next.js 14 App Router + Tailwind CSS)            │
+│  Landing Page (/) ──▶ Auth Portal (/login, /signup)                                    │
+│        │                                                                               │
+│        ▼                                                                               │
+│  ┌─────────────────────────────────────────┐  ┌──────────────────────────────────────┐ │
+│  │ Admin Workspace (/admin)                │  │ Employee Portal (/employee)          │ │
+│  │ • Directory & Onboarding Modal          │  │ • Personal Overview Dashboard        │ │
+│  │ • Leave Approval Queue & Ledgers        │  │ • Tasks (List & Kanban Views)        │ │
+│  │ • Payroll & Tax Breakdown Engine        │  │ • Leave Balance & Submission         │ │
+│  │ • Performance Reviews & Access Control  │  │ • Personal Profile & Manager Info    │ │
+│  └────────────────────┬────────────────────┘  └──────────────────┬───────────────────┘ │
+└───────────────────────┼──────────────────────────────────────────┼─────────────────────┘
+                        │                                          │
+                        ▼                                          ▼
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                        CONNECTED BUSINESS ENGINE & EVENT BUS                           │
+│  • RBAC Access & Route Protection Gate                                                 │
+│  • Auto-generate Onboarding Kanban Boards for New Hires                                │
+│  • Proactive Task Delay Signaling on Approved Leave                                    │
+│  • Org Chart-driven Task Permission Inheritance                                        │
+│  • Prepopulate Review Cycles with Real Sprint Velocity                                 │
+└───────────────────────────────────────────┬────────────────────────────────────────────┘
+                                            │
+                                            ▼
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                              DATA & PERSISTENCE LAYER                                  │
+│  • Prisma ORM / Data Access Layer (DAL)                                                │
+│  • PostgreSQL Database: Users, Org Hierarchy, Leaves, Tasks, Payroll, Reviews          │
+└────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-### 2. Repository & File Organization Flow
-
-```mermaid
-graph TD
-    Root["Software-Engineering-Project/"]
-    Root --> DocsDir["📁 docs/"]
-    Root --> FrontendDir["📁 frontend/"]
-    Root --> License["📄 LICENSE"]
-    Root --> Readme["📄 README.md"]
-
-    DocsDir --> DocContent["content.md (SRS & Feature Architecture)"]
-    DocsDir --> DocTex["project_overview.tex (Full Academic LaTeX Report)"]
-
-    FrontendDir --> PublicDir["📁 public/"]
-    FrontendDir --> SrcDir["📁 src/"]
-    FrontendDir --> PkgJson["package.json & configs (Next.js 14, Tailwind, TS)"]
-
-    PublicDir --> Logo["logo.png (Workplace Official Logo)"]
-    PublicDir --> Bg["bg.png (Glassmorphism backdrop)"]
-    PublicDir --> Assets["📁 assets/ (SVGs, icons, Casp branding)"]
-
-    SrcDir --> AppDir["📁 app/"]
-    SrcDir --> CompDir["📁 components/ (ProfileDropdown, ThemeProvider)"]
-    SrcDir --> DbPlan["database_planning.md (PostgreSQL 4-layer DAL Plan)"]
-
-    AppDir --> AuthRoutes["📁 (auth)/ (login, signup)"]
-    AppDir --> AdminRoutes["📁 admin/ (directory, leaves, payroll, performance, access)"]
-    AppDir --> EmpRoutes["📁 employee/ (tasks, leaves, profile)"]
-    AppDir --> RootPage["page.tsx (Landing Page)"]
-```
-
----
-
-### 3. Software User Journey Flow
+### 2. Software User Journey Flow
 
 This diagram illustrates how different users navigate through the Workplace platform after authentication:
 
-```mermaid
-flowchart TD
-    Start(["🌐 User Visits Workplace"]) --> Landing["Landing Page (/)\n• Product Overview\n• Hero Section & CTA"]
-
-    Landing --> AuthCheck{"Authenticated?"}
-    AuthCheck -- No --> AuthPortal["Auth Portal"]
-    AuthPortal --> Login["Login (/login)"]
-    AuthPortal --> Signup["Signup (/signup)"]
-    Login & Signup --> RoleCheck
-
-    AuthCheck -- Yes --> RoleCheck{"User Role?"}
-
-    RoleCheck -- SUPER_ADMIN / HR_ADMIN --> AdminDash
-    RoleCheck -- MANAGER --> AdminDash
-    RoleCheck -- EMPLOYEE --> EmpDash
-
-    subgraph AdminWorkspace["🔧 Admin Workspace"]
-        AdminDash["Dashboard (/admin)\n• Headcount KPIs\n• Pending Approvals\n• Org Capacity %\n• Global Activity Feed"]
-        AdminDash --> Dir["📋 Directory\n(/admin/directory)\n• Employee Roster\n• Add New Hire\n• Status Filters"]
-        AdminDash --> Leaves["🏖️ Leave Queue\n(/admin/leaves)\n• Review Requests\n• Approve / Reject\n• Quota Ledger"]
-        AdminDash --> Pay["💰 Payroll\n(/admin/payroll)\n• Salary Config\n• Tax Deductions\n• Payslip Gen"]
-        AdminDash --> Perf["📈 Performance\n(/admin/performance)\n• OKR Tracking\n• Review Cycles\n• 360° Feedback"]
-        AdminDash --> Access["🔒 Access Control\n(/admin/access)\n• Role Assignment\n• Module Visibility"]
-    end
-
-    subgraph EmpWorkspace["👤 Employee Workspace"]
-        EmpDash["Dashboard (/employee)\n• Personal Overview\n• Attendance Status\n• Quick Actions"]
-        EmpDash --> Tasks["📋 My Tasks\n(/employee/tasks)\n• List View\n• Kanban Board\n• Priority Tagging"]
-        EmpDash --> MyLeaves["🏖️ My Leaves\n(/employee/leaves)\n• Submit Request\n• Balance Tracker\n• Holiday Calendar"]
-        EmpDash --> Profile["👤 My Profile\n(/employee/profile)\n• Personal Info\n• Reporting Manager\n• Emergency Contact"]
-    end
-
-    Dir -.->|"🔄 Onboarding triggers\nauto Kanban board"| Tasks
-    Leaves -.->|"⚠️ Approved leave flags\ntasks as delayed"| Tasks
-    Perf -.->|"🎯 Reviews pull real\ntask velocity data"| Tasks
+```text
+                          ┌──────────────────────────┐
+                          │  🌐 User Visits Platform  │
+                          └─────────────┬────────────┘
+                                        │
+                                        ▼
+                          ┌──────────────────────────┐
+                          │   Landing Page ( / )     │
+                          │   Overview, Hero, CTA    │
+                          └─────────────┬────────────┘
+                                        │
+                                 [Authenticated?]
+                                 /              \
+                             No /                \ Yes
+                               ▼                  ▼
+                    ┌─────────────────────┐    ┌─────────────────────┐
+                    │     Auth Portal     │    │   Role Dispatcher   │
+                    │   /login & /signup  │───▶│   (RBAC Session)    │
+                    └─────────────────────┘    └──────────┬──────────┘
+                                                          │
+                   ┌──────────────────────────────────────┴──────────────────────────────────────┐
+                   │                                                                             │
+           [ SUPER_ADMIN / HR_ADMIN / MANAGER ]                                             [ EMPLOYEE ]
+                   │                                                                             │
+                   ▼                                                                             ▼
+┌─────────────────────────────────────────────────────────┐   ┌─────────────────────────────────────────────────────────┐
+│              🔧 ADMIN WORKSPACE (/admin)                │   │             👤 EMPLOYEE WORKSPACE (/employee)           │
+│                                                         │   │                                                         │
+│  • Dashboard (/admin) ── Headcount KPIs, Approvals Feed │   │  • Dashboard (/employee) ── Personal stats & quick act. │
+│  • Directory (/admin/directory) ── New hire modal       │   │  • My Tasks (/employee/tasks) ── List & Kanban board    │
+│  • Leave Queue (/admin/leaves) ── Approve / Reject      │   │  • My Leaves (/employee/leaves) ── Balance & requests   │
+│  • Payroll (/admin/payroll) ── Salary, taxes, payslips  │   │  • My Profile (/employee/profile) ── Hierarchy info     │
+│  • Performance (/admin/performance) ── Review cycles    │   └────────────────────────────┬────────────────────────────┘
+│  • Access (/admin/access) ── Role & permission matrix   │                                │
+└───────────────────────────┬─────────────────────────────┘                                │
+                            │                                                              │
+                            │                🔄 CONNECTED WEDGE INTERACTIONS               │
+                            │  [Onboarding Hire]  ──▶  Auto-generates onboarding board ──▶ │
+                            │  [Approved Leave]   ──▶  Flags active tasks as delayed  ──▶ │
+                            │  [Review Cycle]     ──◀  Pulls actual task velocity data ───┘
 ```
 
 ---
 
-### 4. Connected Wedge — Reactive Event Flow
+### 3. Connected Wedge — Reactive Event Flow
 
 This is the core differentiator: HR events and Work events are **reactively connected** in a single system.
 
-```mermaid
-flowchart LR
-    subgraph HREvents["📌 HR Domain Events"]
-        E1["New Hire Added\nto Directory"]
-        E2["Leave Request\nApproved"]
-        E3["Org Chart\nUpdated"]
-        E4["Attendance\nLogged"]
-    end
-
-    subgraph EventBus["⚡ Connected Event Engine"]
-        Bus(("Reactive\nEvent Bus"))
-    end
-
-    subgraph WorkEffects["🔧 Automated Work Effects"]
-        W1["✅ Auto-generate Onboarding\nKanban Board with IT, HR,\nBuddy & Training tasks"]
-        W2["⚠️ Flag active tasks as\n'Delayed — On Leave'\n+ Suggest Reassignment"]
-        W3["🔑 Inherit task view/assign\npermissions from reporting\nhierarchy automatically"]
-        W4["📊 Update workload context\nin sprint planning &\nmanager leave-approval view"]
-    end
-
-    subgraph PerfLoop["🎯 Performance Feedback Loop"]
-        P1["Pull real task velocity,\ndeadline adherence &\ndeliverables into Reviews"]
-    end
-
-    E1 --> Bus --> W1
-    E2 --> Bus --> W2
-    E3 --> Bus --> W3
-    E4 --> Bus --> W4
-    W1 & W2 & W3 & W4 --> P1
+```text
+┌──────────────────────────┐      ┌──────────────────────────┐      ┌───────────────────────────────────────────────┐
+│     HR DOMAIN EVENTS     │      │   CONNECTED EVENT BUS    │      │             AUTOMATED WORK EFFECTS            │
+├──────────────────────────┤      ├──────────────────────────┤      ├───────────────────────────────────────────────┤
+│ 1. New Hire Added to     │ ───▶ │                          │ ───▶ │ Auto-generate Onboarding Kanban Board         │
+│    Company Directory     │      │                          │      │ (IT setup, compliance, buddy intro, training) │
+│                          │      │                          │      │                                               │
+│ 2. Employee Leave        │ ───▶ │   ⚡ REACTIVE ENGINE     │ ───▶ │ Auto-flag assigned tasks as "Delayed"         │
+│    Request Approved      │      │   Centralized Domain     │      │ and suggest immediate reassignment to peers   │
+│                          │      │   Event Dispatcher       │      │                                               │
+│ 3. Organizational Chart  │ ───▶ │                          │ ───▶ │ Inherit task view & delegate permissions      │
+│    Reporting Updated     │      │                          │      │ directly from organizational hierarchy        │
+│                          │      │                          │      │                                               │
+│ 4. Daily Attendance &    │ ───▶ │                          │ ───▶ │ Embed leave context & capacity into           │
+│    Time Logged           │      │                          │      │ sprint task planning and manager review       │
+└──────────────────────────┘      └────────────┬─────────────┘      └───────────────────────┬───────────────────────┘
+                                               │                                            │
+                                               ▼                                            ▼
+                                  ┌─────────────────────────────────────────────────────────────────┐
+                                  │                  🎯 OBJECTIVE PERFORMANCE LOOP                  │
+                                  │   Pull verified task velocity, deadline completion rate, and    │
+                                  │   peer contributions directly into performance review cycles.   │
+                                  └─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -358,22 +311,12 @@ Software-Engineering-Project/
 
 ### Setup Pipeline — Visual Overview
 
-```mermaid
-flowchart LR
-    A["📥 Prerequisites\n• Node.js ≥ 18.17\n• Git installed\n• npm / pnpm / yarn"] --> B["📦 Clone Repo\ngit clone ...\ncd Software-Engineering-Project"]
-    B --> C["📂 Enter Frontend\ncd frontend"]
-    C --> D["⬇️ Install Deps\nnpm install"]
-    D --> E["⚙️ .env.local\n(Optional config)"]
-    E --> F["🚀 Launch Server\nnpm run dev"]
-    F --> G["🌐 Open Browser\nhttp://localhost:3000"]
-
-    style A fill:#f0f4ff,stroke:#4a6fa5,color:#1a1a2e
-    style B fill:#f0f4ff,stroke:#4a6fa5,color:#1a1a2e
-    style C fill:#f0f4ff,stroke:#4a6fa5,color:#1a1a2e
-    style D fill:#f0f4ff,stroke:#4a6fa5,color:#1a1a2e
-    style E fill:#fffbe6,stroke:#b8860b,color:#1a1a2e
-    style F fill:#e8f5e9,stroke:#2e7d32,color:#1a1a2e
-    style G fill:#e8f5e9,stroke:#2e7d32,color:#1a1a2e
+```text
+┌──────────────────┐       ┌────────────────────────┐       ┌──────────────────┐       ┌───────────────────┐
+│ 1. PREREQUISITES │ ────▶ │ 2. CLONE & NAVIGATE    │ ────▶ │ 3. INSTALL DEPS  │ ────▶ │ 4. RUN DEV SERVER │
+│  • Node.js ≥ 18  │       │  git clone <repo-url>  │       │  cd frontend     │       │  npm run dev      │
+│  • npm / pnpm    │       │  cd Software-Eng...    │       │  npm install     │       │  :3000 live       │
+└──────────────────┘       └────────────────────────┘       └──────────────────┘       └───────────────────┘
 ```
 
 ### Quick Commands
@@ -401,33 +344,24 @@ npm run dev
 
 ### 🧭 Route Map — Pages You Can Explore
 
-```mermaid
-flowchart TD
-    Root["🌐 localhost:3000"] --> LP["/ — Landing Page"]
-    Root --> Auth["Authentication"]
-    Root --> Admin["Admin Workspace"]
-    Root --> Emp["Employee Workspace"]
-
-    Auth --> Login["/login"]
-    Auth --> Signup["/signup"]
-
-    Admin --> AD["/admin — Dashboard & KPIs"]
-    AD --> A1["/admin/directory — Employee Roster"]
-    AD --> A2["/admin/leaves — Leave Approval Queue"]
-    AD --> A3["/admin/payroll — Salary & Tax Config"]
-    AD --> A4["/admin/performance — Review Cycles"]
-    AD --> A5["/admin/access — Permission Mgmt"]
-
-    Emp --> ED["/employee — Personal Overview"]
-    ED --> E1["/employee/tasks — List & Kanban"]
-    ED --> E2["/employee/leaves — Balance Tracker"]
-    ED --> E3["/employee/profile — My Profile"]
-
-    style Root fill:#1a1a2e,stroke:#1a1a2e,color:#ffffff
-    style LP fill:#f0f4ff,stroke:#4a6fa5,color:#1a1a2e
-    style Auth fill:#fff3e0,stroke:#e65100,color:#1a1a2e
-    style Admin fill:#e8eaf6,stroke:#283593,color:#1a1a2e
-    style Emp fill:#e0f2f1,stroke:#00695c,color:#1a1a2e
+```text
+http://localhost:3000/
+├── / ........................... Public Landing Page (Overview, Hero, Features)
+├── (auth)/
+│   ├── /login .................. User Authentication / Sign-In Portal
+│   └── /signup ................. New Account Registration
+├── admin/ ...................... HR Admin Workspace
+│   ├── /admin .................. Executive Dashboard & Headcount KPIs
+│   ├── /admin/directory ........ Employee Index & Add New Hire Modal
+│   ├── /admin/leaves ........... Leave Approval Queue & Ledgers
+│   ├── /admin/payroll .......... Salary Breakdown & Tax Computation
+│   ├── /admin/performance ...... OKR Evaluation & Review Cycles
+│   └── /admin/access ........... Role Assignment & Permissions
+└── employee/ ................... Employee Self-Service Workspace
+    ├── /employee ............... Personal Overview & Quick Status
+    ├── /employee/tasks ......... Task Management (List & Kanban Views)
+    ├── /employee/leaves ........ Leave Balance & Submission
+    └── /employee/profile ....... Personal Profile & Reporting Info
 ```
 
 ---
@@ -436,48 +370,39 @@ flowchart TD
 
 ### Deployment Pipeline — Visual Overview
 
-```mermaid
-flowchart TD
-    subgraph Step1["1. Prepare & Push"]
-        Code["Local Code"] --> Commit["git add . && git commit"]
-        Commit --> Push["git push origin main"]
-        Push --> GH[("GitHub Repository")]
-    end
-
-    GH --> Choice{"Choose Hosting"}
-
-    subgraph OptionA["⭐ Option A: Vercel (Recommended)"]
-        V1["Import repo on vercel.com"] --> V2["Set root dir → frontend"]
-        V2 --> V3["Click Deploy"]
-        V3 --> V4["✅ Auto SSL + CDN\nhttps://workplace-ems.vercel.app"]
-    end
-
-    subgraph OptionB["Option B: VPS + Nginx"]
-        S1["npm run build"] --> S2["PM2 process manager\npm2 start npm -- start"]
-        S2 --> S3["Nginx reverse proxy\n→ localhost:3000"]
-        S3 --> S4["Certbot SSL cert"]
-        S4 --> S5["✅ https://yourdomain.com"]
-    end
-
-    subgraph OptionC["Option C: Docker"]
-        D1["Write Dockerfile"] --> D2["docker build -t workplace ."]
-        D2 --> D3["docker run -p 3000:3000"]
-        D3 --> D4["✅ Container live on :3000"]
-    end
-
-    Choice --> OptionA
-    Choice --> OptionB
-    Choice --> OptionC
-
-    subgraph DB["Database (All Options)"]
-        CloudDB[("Cloud PostgreSQL\nSupabase / Neon / AWS RDS")]
-    end
-
-    V4 & S5 & D4 <-.-> CloudDB
-
-    style OptionA fill:#e8f5e9,stroke:#2e7d32,color:#1a1a2e
-    style OptionB fill:#e3f2fd,stroke:#1565c0,color:#1a1a2e
-    style OptionC fill:#fce4ec,stroke:#c62828,color:#1a1a2e
+```text
+                           ┌───────────────────────────┐
+                           │    LOCAL CODE BASE        │
+                           │    git commit & push      │
+                           └─────────────┬─────────────┘
+                                         │
+                                         ▼
+                           ┌───────────────────────────┐
+                           │   GITHUB REPOSITORY       │
+                           │   main branch (origin)    │
+                           └─────────────┬─────────────┘
+                                         │
+                   ┌─────────────────────┼─────────────────────┐
+                   │                     │                     │
+                   ▼                     ▼                     ▼
+        ┌─────────────────────┐┌─────────────────────┐┌─────────────────────┐
+        │  OPTION A: VERCEL   ││   OPTION B: VPS     ││  OPTION C: DOCKER   │
+        │   (Recommended)     ││   (Ubuntu + Nginx)  ││   (Containerized)   │
+        ├─────────────────────┤├─────────────────────┤├─────────────────────┤
+        │ • Import repo       ││ • npm run build     ││ • docker build      │
+        │ • Root: frontend    ││ • PM2 daemon        ││ • docker run -p 3000│
+        │ • Zero config       ││ • Nginx proxy :3000 ││ • Portable image    │
+        │ • Free SSL & CDN    ││ • Certbot SSL       ││ • Isolated runtime  │
+        └──────────┬──────────┘└──────────┬──────────┘└──────────┬──────────┘
+                   │                      │                      │
+                   └──────────────────────┼──────────────────────┘
+                                          │
+                                          ▼
+                             ┌────────────────────────┐
+                             │  MANAGED POSTGRESQL    │
+                             │  Supabase / Neon / RDS │
+                             │  DATABASE_URL in .env  │
+                             └────────────────────────┘
 ```
 
 ---
