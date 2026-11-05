@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import localFont from 'next/font/local';
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { StoreProvider } from "@/lib/store";
+import { ToastProvider } from "@/components/ui";
 
 const rethink = localFont({
   src: [
@@ -21,7 +23,7 @@ const rethink = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Workplace",
+  title: { default: "Workplace — Employee Management System", template: "%s · Workplace" },
   description: "The unified workspace for your entire company.",
 };
 
@@ -34,7 +36,9 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${rethink.variable} font-sans bg-gray-50 text-black dark:bg-black dark:text-white antialiased selection:bg-black/20 dark:selection:bg-white/20 min-h-screen transition-colors duration-300`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-          {children}
+          <StoreProvider>
+            <ToastProvider>{children}</ToastProvider>
+          </StoreProvider>
         </ThemeProvider>
       </body>
     </html>

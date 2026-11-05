@@ -28,7 +28,8 @@
    - [Connected Wedge — Reactive Event Flow](#3-connected-wedge--reactive-event-flow)
 4. [Feature Breakdown](#-feature-breakdown)
    - [Core Common HR Features (Table Stakes)](#41-core-common-hr-features-table-stakes)
-   - [Extra & Connected Differentiator Features (The Wedge)](#42-extra--connected-differentiator-features-the-wedge)
+   - [Work Management & Connected Features (The Wedge)](#42-work-management--connected-differentiator-features-the-wedge)
+   - [Demo Accounts](#43-demo-accounts)
 5. [Repository Structure](#-repository-structure)
 6. [Getting Started on Localhost](#-getting-started-on-localhost)
 7. [Making It Live (Production Deployment)](#-making-it-live-production-deployment)
@@ -190,58 +191,55 @@ This is the core differentiator: HR events and Work events are **reactively conn
 
 ## 🌟 Feature Breakdown
 
-### 4.1. Core Common HR Features (Table Stakes)
-Essential operational modules required by modern enterprise standards:
+> **Status:** the frontend is fully implemented end-to-end. Every module below is interactive and backed by a typed, in-browser data store (`src/lib/store.tsx`) that persists to `localStorage` and mirrors the planned Prisma/PostgreSQL schema — so the UI can be wired to real API routes later without reshaping data.
 
-- 🛡️ **Role-Based Access Control (RBAC)**: Distinct permissions for `SUPER_ADMIN`, `HR_ADMIN`, `MANAGER`, and `EMPLOYEE`.
-- 🔐 **Authentication & Session Routing**: Clean login and signup screens with error states, form validation, and role redirection (`/login`, `/signup`).
-- 📊 **Admin Executive Overview (`/admin`)**:
-  - Live metric widgets: Total Headcount (`142`), Pending Leave Approvals (`7`), and Organizational Capacity (`92%`).
-  - Global real-time audit feed tracking system actions and announcements.
-- 👥 **Employee Directory (`/admin/directory`)**:
-  - Comprehensive employee index with status filters (Active, Onboarding, Terminated).
-  - Department, designation, and reporting manager mappings.
-  - Interactive modal to add new hires to the company roster.
-- 🏖️ **Leave Management & Approvals (`/admin/leaves`)**:
-  - Central queue to review, approve, or reject employee leave requests.
-  - Quota ledger checking (Annual, Sick, Casual, Parental).
-- 💰 **Payroll & Compensation Management (`/admin/payroll`)**:
-  - Salary structure configuration, tax deductions, and automated net pay computation.
-  - Payslip generation and expense reimbursement claim audits.
-- 📈 **Performance Management (`/admin/performance`)**:
-  - Goal tracking (OKRs / KPIs) across quarters.
-  - 360-degree review cycles (self, peer, and manager ratings).
-- 🔒 **Access Management (`/admin/access`)**:
-  - Permission assignment, module visibility switches, and account status controls.
-- 👤 **Employee Self-Service Portal (`/employee`, `/employee/profile`)**:
-  - Personal profile view with contact information, department, and emergency contacts.
-  - Personal leave portal to submit requests and track remaining balances (`/employee/leaves`).
+### 4.1. Core Common HR Features (Table Stakes)
+
+| Module | Route(s) | What you can do |
+| :--- | :--- | :--- |
+| 🔐 **Authentication & RBAC** | `/login`, `/signup`, `/dashboard` | Email/password login with validation, demo-account dropdown, role-based redirect (`SUPER_ADMIN`, `HR_ADMIN` → Admin Console; `MANAGER`, `EMPLOYEE` → Employee Portal), route guards, organization sign-up, logout. |
+| 📊 **Admin Overview** | `/admin` | Live KPIs (headcount, pending approvals, org capacity, clock-ins), approval inbox with one-click approve/reject, connected-engine signals, global HR + Work activity feed, headcount by department, upcoming holidays, who is out today. |
+| 👥 **Employee Directory & Profiles** | `/admin/directory`, `/admin/directory/[id]`, `/employee/directory` | Search, filter (department/status/role), sort, table/card views, CSV export, **Add New Hire** modal. Full employee record: personal & emergency info, job & reporting line (editable), documents (upload/verify), assets, compensation, leave balances, work & performance. |
+| 🌳 **Org Chart** | `/admin/org-chart`, `/employee/org-chart` | Interactive reporting tree with expand/collapse, department filter and search. |
+| 🧭 **Onboarding & Offboarding** | `/admin/onboarding` | Onboarding pipeline (board progress, document checklist, offer-letter status, buddy, complete onboarding). Offboarding: exit checklist, asset return, open-work hand-off, full & final settlement (pro-rata salary + leave encashment). |
+| ⏱️ **Attendance & Time Tracking** | `/admin/attendance`, `/employee/attendance` | Clock in/out (office or remote) with live timer, daily register with corrections, monthly summary + CSV, shift management, weekly timesheets (draft → submit → approve/reject). |
+| 🏖️ **Leave Management** | `/admin/leaves`, `/employee/leaves` | Apply with live working-day count & balance validation, cancel pending requests, approval queue with workload context, history & balance ledger, holiday calendar (month grid + management). |
+| 💰 **Payroll** | `/admin/payroll`, `/employee/payslips` | Salary structures, monthly payroll runs (Draft → Processed → Paid) with PF, professional tax, slab-based TDS and loss-of-pay from attendance/unpaid leave, printable/downloadable payslips, YTD summary. |
+| 🧾 **Expense Claims** | `/admin/expenses`, `/employee/expenses` | Submit claims with receipts, approve/reject; approved claims are reimbursed automatically through the next payroll run. |
+| 📈 **Performance Management** | `/admin/performance`, `/employee/performance` | Goals/OKRs/KPIs with key results, review cycles (launch/close), self, peer and manager reviews with star ratings, rating distribution. |
+| 🔒 **Access Control** | `/admin/access` | Role × module permission matrix (drives sidebar visibility), role changes with Super Admin safeguards, suspend/activate accounts, password reset. |
+| 📉 **Reports** | `/admin/reports` | Headcount, status mix, attendance, leave utilisation, payroll trend, salary cost by department, task throughput, top contributors. |
+| 🔔 **Notifications & Audit Log** | `/admin/notifications`, `/employee/notifications` | Unified inbox (HR / Work / System) with bell dropdown and mark-as-read, plus an organization-wide audit log with filters and CSV export. |
+| ⚙️ **Settings** | `/admin/settings` | Organization name, departments, holiday calendar, demo-data reset. |
 
 ---
 
-### 4.2. Extra & Connected Differentiator Features (The Wedge)
-Unique high-impact capabilities bridging HR and project workflows:
+### 4.2. Work Management & Connected Differentiator Features (The Wedge)
 
-- 🔄 **Onboarding → Auto-Generated Kanban Board**:
-  - Adding a new hire dynamically creates a pre-configured onboarding Kanban board with tasks for IT setup, documentation, buddy assignment, and initial training.
-- ⚠️ **Leave Approval → Automatic Task Delay Signaling**:
-  - When an employee's leave request is approved, active tasks assigned to them are automatically flagged as `"Delayed — On Leave"`.
-  - The system proactively recommends task reassignment to available peers.
-- 🌳 **Org Chart-Driven Task Governance**:
-  - Task viewing, delegation, and approval rights inherit directly from the organizational reporting hierarchy, eliminating duplicate permission setups.
-- 🎯 **Objective Performance Reviews from Real Work Velocity**:
-  - Evaluation cycles pull real deliverables, completed tickets, and deadline adherence statistics into review templates, eliminating subjective bias.
-- ⏱️ **Attendance & Workload Context Alignment**:
-  - Managers reviewing project timelines can view sprint capacity alongside real-time attendance and planned leave.
-- 📋 **Dual-View Work Management (`/employee/tasks`)**:
-  - **Interactive List View**: Prioritized daily task list with high/medium/low priority chips and status indicators.
-  - **Kanban Board View**: Drag-and-drop workflow columns (*To Do*, *In Progress*, *Under Review*, *Done*).
-- 🌓 **Dynamic Theme System**:
-  - System-wide Dark Mode and Light Mode support powered by `next-themes` with seamless transitions.
-- 💎 **Glassmorphic Aesthetic Design**:
-  - Tailored UI built with backdrop filters, subtle micro-borders, gradient overlays, and modern typography.
-- 📱 **Interactive Navigation & Profile Drawer (`ProfileDropdown`)**:
-  - One-click role switching between Admin and Employee dashboards, user details, and quick setting links.
+- 📋 **Dual-View Tasks (`/employee/tasks`)** — List view grouped by Overdue / Today / This week / Later, and a cross-board **drag-and-drop Kanban**. Scopes: *Assigned to me*, *My team*, *Personal to-dos*. Priorities, due dates, **recurring tasks** (daily/weekly auto-respawn), tags, comments, file attachments.
+- 🗂️ **Projects & Boards (`/admin/projects`)** — Project creation, per-project Kanban with **custom workflow stages** (add/rename/remove), member filter, progress tracking.
+- 🔄 **Onboarding → Auto-Generated Kanban Board** — Adding a new hire instantly creates an onboarding board with IT, HR, Manager, Buddy and Employee tasks assigned to the right people, and notifies them.
+- ⚠️ **Leave → Task Delay Signals** — Approving leave flags the person's affected tasks as *"Delayed — On Leave"*, comments on them, notifies task owners, and **suggests the least-loaded same-department peer** for one-click reassignment.
+- 🌳 **Org Chart → Task Permissions** — Who can assign or see whose tasks is inherited from the reporting hierarchy (managers see their subtree; admins see all). Changing a manager re-inherits permissions automatically.
+- 🎯 **Performance Reviews → Real Task Data** — Reviews are pre-populated with tasks completed, on-time rate, missed deadlines, projects, attendance rate and leave days for the cycle window.
+- ⏱️ **Attendance → Workload Context** — Managers (`/employee/team`) and admins see open/overdue/flagged tasks next to today's attendance and planned leave when approving time off.
+- 🔔 **Cross-Module Notifications** — One feed for HR events (leave approved, new joiner, review due, payslip ready) and Work events (task assigned, comment, deadline).
+- 🌓 **Dark / Light / System theme**, responsive layouts with a mobile sidebar, global search (people, projects, tasks), toasts and confirmation dialogs.
+
+---
+
+### 4.3. Demo Accounts
+
+All demo users share the password **`demo1234`**. They can also be picked from the *Demo account* dropdown on the login page:
+
+| Role | Email | Lands on |
+| :--- | :--- | :--- |
+| Super Admin | `arjun@workplace.com` | `/admin` |
+| HR Admin | `neha@workplace.com` | `/admin` |
+| Manager | `john@workplace.com` | `/employee` (with **My Team**) |
+| Employee | `alice@workplace.com` | `/employee` |
+
+Data is seeded relative to today's date and saved in your browser. Use **Profile menu → Reset demo data** to start fresh.
 
 ---
 
@@ -249,60 +247,40 @@ Unique high-impact capabilities bridging HR and project workflows:
 
 ```text
 Software-Engineering-Project/
-├── .git/                                 # Git version control metadata
-├── LICENSE                               # MIT License
-├── README.md                             # Comprehensive project documentation (this file)
-│
-├── docs/                                 # Academic & Architectural Documentation
-│   ├── content.md                        # SRS & Product Feature specifications
-│   └── project_overview.tex              # Complete LaTeX academic project documentation
-│
-└── frontend/                             # Next.js 14 Web Application
-    ├── package.json                      # Dependencies and npm scripts
-    ├── tsconfig.json                     # TypeScript compiler options
-    ├── tailwind.config.ts                # Tailwind styling configurations
-    ├── postcss.config.mjs                # PostCSS configuration
-    ├── next.config.mjs                   # Next.js runtime configurations
-    │
-    ├── public/                           # Static assets
-    │   ├── logo.png                      # Official Workplace logo
-    │   ├── favicon.png                   # Browser favicon
-    │   ├── bg.png                        # Hero glassmorphic background
-    │   └── assets/                       # Vector SVGs, icons, and branding illustrations
-    │
+├── LICENSE
+├── README.md                              # This file
+├── docs/
+│   ├── content.md                         # Product feature specification
+│   └── project_overview.tex               # LaTeX academic documentation
+└── frontend/                              # Next.js 14 web application
+    ├── package.json · tsconfig.json · tailwind.config.ts · next.config.mjs
+    ├── public/                            # Logo, background, fonts, icons
     └── src/
-        ├── database_planning.md          # PostgreSQL schema & 4-Layer DAL blueprint
-        │
-        ├── components/                   # Reusable UI Components
-        │   ├── ProfileDropdown.tsx       # User avatar & role switcher dropdown
-        │   └── ThemeProvider.tsx         # Next-themes dark/light context provider
-        │
-        └── app/                          # Next.js 14 App Router
-            ├── (auth)/                   # Authentication route group
-            │   ├── layout.tsx            # Split-screen auth layout
-            │   ├── login/page.tsx        # Sign-in portal
-            │   └── signup/page.tsx       # Sign-up portal
-            │
-            ├── admin/                    # HR Admin Workspace
-            │   ├── layout.tsx            # Admin sidebar navigation & header
-            │   ├── page.tsx              # Admin Overview & metric cards
-            │   ├── directory/page.tsx    # Employee Directory & Onboarding modal
-            │   ├── leaves/page.tsx       # Leave approval queue
-            │   ├── payroll/page.tsx      # Payroll & salary configuration
-            │   ├── performance/page.tsx  # Employee review cycles
-            │   └── access/page.tsx       # User permissions management
-            │
-            ├── employee/                 # Employee Workspace
-            │   ├── layout.tsx            # Employee sidebar navigation & header
-            │   ├── page.tsx              # Employee personal overview
-            │   ├── tasks/page.tsx        # Task management (List & Kanban views)
-            │   ├── leaves/page.tsx       # Personal leave balance & application
-            │   └── profile/page.tsx      # Personal & professional profile
-            │
-            ├── globals.css               # Global CSS & Tailwind layers
-            ├── layout.tsx                # Root layout with ThemeProvider
-            ├── not-found.tsx             # Custom 404 page
-            └── page.tsx                  # Workplace landing page
+        ├── database_planning.md           # PostgreSQL schema & 4-layer DAL blueprint
+        ├── lib/
+        │   ├── types.ts                   # Domain model (mirrors the planned Prisma schema)
+        │   ├── seed.ts                    # Realistic demo organization (dates relative to today)
+        │   ├── store.tsx                  # Client data store + all domain actions & connected engine
+        │   └── utils.ts                   # Dates, payroll/tax maths, hierarchy, metrics, RBAC helpers
+        ├── components/
+        │   ├── AppShell.tsx               # Sidebar, header, global search, notification bell, route guard
+        │   ├── ui.tsx                     # Design-system primitives (Button, Card, Modal, Table, Toast…)
+        │   ├── tasks/TaskComponents.tsx   # Kanban board, task cards, create/detail modals
+        │   ├── org/                       # Org chart, new-hire, offboarding & profile modals
+        │   ├── employee/ClockWidget.tsx   # Clock in/out widget
+        │   ├── Payslip.tsx                # Printable payslip
+        │   ├── PerformanceMetrics.tsx     # Task/attendance-driven review metrics
+        │   ├── NotificationsCenter.tsx    # Inbox + audit log
+        │   └── ProfileDropdown.tsx · ThemeProvider.tsx
+        └── app/
+            ├── page.tsx                   # Landing page
+            ├── (auth)/login · (auth)/signup
+            ├── dashboard/                 # Role dispatcher
+            ├── admin/                     # overview, directory/[id], org-chart, onboarding, access,
+            │                              # projects, leaves, attendance, payroll, expenses,
+            │                              # performance, reports, notifications, settings
+            └── employee/                  # hub, tasks, leaves, attendance, payslips, expenses,
+                                           # performance, profile, team, directory, org-chart, notifications
 ```
 
 ---
@@ -330,15 +308,11 @@ cd Software-Engineering-Project
 cd frontend
 npm install
 
-# Step 3 — (Optional) Create frontend/.env.local
-# NEXT_PUBLIC_APP_NAME="Workplace"
-# DATABASE_URL="postgresql://user:pass@localhost:5432/workplace_ems"
-
-# Step 4 — Run
+# Step 3 — Run
 npm run dev
 ```
 
-> **Result →** Open **http://localhost:3000** in your browser. The app hot-reloads on file changes.
+> **Result →** Open **http://localhost:3000**, click **Log In**, pick a role from the *Demo account* dropdown and explore. No database or `.env` is required — the frontend ships with a self-contained demo data layer.
 
 ---
 
@@ -346,23 +320,39 @@ npm run dev
 
 ```text
 http://localhost:3000/
-├── / ........................... Public Landing Page (Overview, Hero, Features)
-├── (auth)/
-│   ├── /login .................. User Authentication / Sign-In Portal
-│   └── /signup ................. New Account Registration
-├── admin/ ...................... HR Admin Workspace
-│   ├── /admin .................. Executive Dashboard & Headcount KPIs
-│   ├── /admin/directory ........ Employee Index & Add New Hire Modal
-│   ├── /admin/leaves ........... Leave Approval Queue & Ledgers
-│   ├── /admin/payroll .......... Salary Breakdown & Tax Computation
-│   ├── /admin/performance ...... OKR Evaluation & Review Cycles
-│   └── /admin/access ........... Role Assignment & Permissions
-└── employee/ ................... Employee Self-Service Workspace
-    ├── /employee ............... Personal Overview & Quick Status
-    ├── /employee/tasks ......... Task Management (List & Kanban Views)
-    ├── /employee/leaves ........ Leave Balance & Submission
-    └── /employee/profile ....... Personal Profile & Reporting Info
+├── / ............................ Landing page
+├── /login · /signup ............. Authentication (demo-account dropdown on login)
+├── /dashboard ................... Role dispatcher → /admin or /employee
+├── admin/ ....................... HR Admin Console (SUPER_ADMIN, HR_ADMIN)
+│   ├── /admin ................... Overview: KPIs, approval inbox, connected signals, activity feed
+│   ├── /admin/directory ......... Directory + Add New Hire;  /admin/directory/[id] full record
+│   ├── /admin/org-chart ......... Reporting hierarchy
+│   ├── /admin/onboarding ........ Onboarding & offboarding pipelines
+│   ├── /admin/access ............ Permission matrix, roles, account status
+│   ├── /admin/projects .......... Projects & Kanban boards (incl. onboarding boards)
+│   ├── /admin/leaves ............ Leave queue, history, balances, holiday calendar
+│   ├── /admin/attendance ........ Daily register, monthly summary, shifts, timesheets
+│   ├── /admin/payroll ........... Payroll runs, payslips, salary structures, tax summary
+│   ├── /admin/expenses .......... Expense claim approvals
+│   ├── /admin/performance ....... Review cycles, goals, rating distribution
+│   ├── /admin/reports ........... Analytics
+│   ├── /admin/notifications ..... Inbox + audit log
+│   └── /admin/settings .......... Organization, departments, holidays, demo reset
+└── employee/ .................... Employee Portal (all roles)
+    ├── /employee ................ Hub: clock-in, stats, today's tasks, feed
+    ├── /employee/tasks .......... List & Kanban (mine / team / personal)
+    ├── /employee/leaves ......... Balances & requests
+    ├── /employee/attendance ..... Attendance calendar & weekly timesheet
+    ├── /employee/payslips ....... Payslips & salary breakdown
+    ├── /employee/expenses ....... Expense claims
+    ├── /employee/performance .... Goals, self/peer reviews
+    ├── /employee/profile ........ Profile, documents, assets, password
+    ├── /employee/team ........... Manager view (workload + approvals + reviews)
+    ├── /employee/directory · /employee/org-chart
+    └── /employee/notifications
 ```
+
+> **Windows tip:** Next.js 14.2.3 fails `next build` with `PageNotFoundError: Cannot find module for page: /_document` when the project path contains parentheses (e.g. `New folder (2)`). Clone into a path without brackets, or map one with `subst W: "D:\New folder (2)\software"` and build from `W:\frontend`. `npm run dev` is unaffected.
 
 ---
 
@@ -451,6 +441,8 @@ docker run -p 3000:3000 -d --name workplace workplace-ems:latest
 ---
 
 ## 🗄️ Database & Backend Roadmap
+
+The frontend currently runs on a client-side store (`frontend/src/lib/store.tsx`) whose actions map 1:1 onto the future API routes and domain services (e.g. `decideLeave` → `LeaveService.approve`, `addEmployee` → onboarding transaction, `generatePayroll` → `PayrollService`). Swapping it for real endpoints only requires replacing the action bodies with `fetch` calls.
 
 As detailed in `frontend/src/database_planning.md`, the platform is designed around a **4-Layer Architecture Pattern**:
 

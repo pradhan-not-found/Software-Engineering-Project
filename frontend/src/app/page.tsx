@@ -4,12 +4,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import ProfileDropdown from "@/components/ProfileDropdown";
+import { useStore } from "@/lib/store";
+import { isAdminRole } from "@/lib/utils";
 
 export default function LandingPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Setting to true as requested to showcase the "logged in" state UI
-  const [isLoggedIn] = useState(true);
+  const { user, ready, logout } = useStore();
+  const isLoggedIn = ready && !!user;
+  const dashboardHref = user && isAdminRole(user.role) ? "/admin" : "/employee";
 
   return (
     <main className="relative min-h-screen w-full flex flex-col overflow-hidden font-sans selection:bg-black/20 dark:selection:bg-white/20">
@@ -106,21 +109,19 @@ export default function LandingPage() {
               <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-3 mb-2">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-gray-500 to-gray-700 flex items-center justify-center text-sm font-semibold text-white border border-white/10">
-                    JD
+                    {user ? `${user.firstName[0]}${user.lastName[0]}` : ""}
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-white font-medium text-sm">John Doe</span>
-                    <span className="text-white/40 text-xs">johndoe@workplace.com</span>
+                    <span className="text-white font-medium text-sm">{user ? `${user.firstName} ${user.lastName}` : ""}</span>
+                    <span className="text-white/40 text-xs">{user?.email}</span>
                   </div>
                 </div>
                 
                 <div className="flex flex-col gap-2 pl-2 border-l border-white/10">
-                  <Link href="/admin" className="text-sm text-white/70 hover:text-white py-1">Dashboard (Admin)</Link>
+                  {user && isAdminRole(user.role) && <Link href="/admin" className="text-sm text-white/70 hover:text-white py-1">Dashboard (Admin)</Link>}
                   <Link href="/employee" className="text-sm text-white/70 hover:text-white py-1">Dashboard (Employee)</Link>
-                  <Link href="#" className="text-sm text-white/70 hover:text-white py-1">Account Settings</Link>
-                  <Link href="#" className="text-sm text-white/70 hover:text-white py-1">Create Team</Link>
-                  <Link href="#" className="text-sm text-purple-400 hover:text-purple-300 py-1">Upgrade to Pro</Link>
-                  <Link href="#" className="text-sm text-red-400 hover:text-red-300 py-1">Log Out</Link>
+                  <Link href="/employee/profile" className="text-sm text-white/70 hover:text-white py-1">Account Settings</Link>
+                  <button onClick={logout} className="text-left text-sm text-red-400 hover:text-red-300 py-1">Log Out</button>
                 </div>
               </div>
             ) : (
@@ -168,14 +169,14 @@ export default function LandingPage() {
             </p>
             
             <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
-              <Link href={isLoggedIn ? "/employee" : "/signup"} className="group relative w-full sm:w-auto flex items-center justify-center gap-2 text-sm font-semibold bg-black text-white dark:bg-white dark:text-black px-8 py-4 rounded-xl hover:bg-gray-900 dark:hover:bg-gray-50 transition-all duration-300 shadow-xl dark:shadow-[0_0_20px_rgba(255,255,255,0.1)] dark:hover:shadow-[0_0_40px_rgba(255,255,255,0.3)]">
+              <Link href={isLoggedIn ? dashboardHref : "/signup"} className="group relative w-full sm:w-auto flex items-center justify-center gap-2 text-sm font-semibold bg-black text-white dark:bg-white dark:text-black px-8 py-4 rounded-xl hover:bg-gray-900 dark:hover:bg-gray-50 transition-all duration-300 shadow-xl dark:shadow-[0_0_20px_rgba(255,255,255,0.1)] dark:hover:shadow-[0_0_40px_rgba(255,255,255,0.3)]">
                 {isLoggedIn ? "Go to Dashboard" : "Get Started"}
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="transform group-hover:translate-x-1 transition-transform duration-300">
                   <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </Link>
               {!isLoggedIn && (
-                <Link href="#" className="w-full sm:w-auto flex items-center justify-center text-sm font-medium bg-black/5 dark:bg-white/5 text-black dark:text-white backdrop-blur-md border border-black/10 dark:border-white/10 px-8 py-4 rounded-xl hover:bg-black/10 dark:hover:bg-white/10 transition-all duration-300 hover:border-black/20 dark:hover:border-white/20">
+                <Link href="/login" className="w-full sm:w-auto flex items-center justify-center text-sm font-medium bg-black/5 dark:bg-white/5 text-black dark:text-white backdrop-blur-md border border-black/10 dark:border-white/10 px-8 py-4 rounded-xl hover:bg-black/10 dark:hover:bg-white/10 transition-all duration-300 hover:border-black/20 dark:hover:border-white/20">
                   Book a Demo
                 </Link>
               )}

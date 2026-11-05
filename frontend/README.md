@@ -32,6 +32,23 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to explore the platform.
 
+No database or environment variables are needed: the app ships with a typed client-side data store (`src/lib/store.tsx`) seeded with a realistic demo organization and persisted to `localStorage`.
+
+### 🔑 Demo accounts
+
+Pick one from the **Demo account** dropdown on `/login`, or type it in. The password for all accounts is `demo1234`.
+
+| Role | Email |
+| :--- | :--- |
+| Super Admin | `arjun@workplace.com` |
+| HR Admin | `neha@workplace.com` |
+| Manager | `john@workplace.com` |
+| Employee | `alice@workplace.com` |
+
+Use **Profile menu → Reset demo data** to restore the seed.
+
+> **Windows note:** `next build` on Next 14.2.3 fails with `Cannot find module for page: /_document` if the folder path contains parentheses (e.g. `New folder (2)`). Build from a path without brackets (or a `subst` drive).
+
 ---
 
 ## 🧭 Application Routes
@@ -47,6 +64,8 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to explore
 - **Task Workspace (List & Kanban)**: `http://localhost:3000/employee/tasks`
 - **My Leaves**: `http://localhost:3000/employee/leaves`
 - **Employee Profile**: `http://localhost:3000/employee/profile`
+- **Admin extras**: `/admin/org-chart`, `/admin/onboarding`, `/admin/projects`, `/admin/attendance`, `/admin/expenses`, `/admin/reports`, `/admin/notifications`, `/admin/settings`, `/admin/directory/[id]`
+- **Employee extras**: `/employee/attendance`, `/employee/payslips`, `/employee/expenses`, `/employee/performance`, `/employee/team`, `/employee/directory`, `/employee/org-chart`, `/employee/notifications`
 - **Login**: `http://localhost:3000/login`
 - **Signup**: `http://localhost:3000/signup`
 
