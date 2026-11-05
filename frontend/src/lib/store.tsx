@@ -146,19 +146,22 @@ function emp(db: DB, id: string | null | undefined) {
 export function suggestPeers(db: DB, employeeId: string, start = today(), end = today()) {
   const person = emp(db, employeeId);
   if (!person) return [];
+  // Candidates: same department, or same team (shares the manager) — so people who are
+  // the only member of their department still get cover suggestions.
   return db.employees
     .filter(
       (e) =>
         e.id !== employeeId &&
-        e.departmentId === person.departmentId &&
+        (e.departmentId === person.departmentId || (!!person.managerId && e.managerId === person.managerId)) &&
         e.status !== "TERMINATED" &&
         e.status !== "OFFBOARDING" &&
+        e.status !== "ONBOARDING" &&
         !db.leaves.some(
           (l) => l.employeeId === e.id && l.status === "APPROVED" && rangesOverlap(l.startDate, l.endDate, start, end),
         ),
     )
-    .map((e) => ({ employee: e, load: openTasksFor(db, e.id).length }))
-    .sort((a, b) => a.load - b.load);
+    .map((e) => ({ employee: e, load: openTasksFor(db, e.id).length, sameDept: e.departmentId === person.departmentId }))
+    .sort((a, b) => Number(b.sameDept) - Number(a.sameDept) || a.load - b.load);
 }
 
 function ensurePersonalBoard(db: DB, ownerId: string): Board {
@@ -953,7 +956,7 @@ function useStoreValue() {
         // hands the work to a same-department peer (the suggested-cover flow).
         const from = emp(db, fromId);
         const to = emp(db, toId);
-        const coverPeer = !!from && !!to && from.departmentId === to.departmentId && canManageTasksFor(db.employees, actor, fromId);
+        const coverPeer = !!from && !!to && (from.departmentId === to.departmentId || (!!from.managerId && from.managerId === to.managerId)) && canManageTasksFor(db.employees, actor, fromId);
         if (!canManageTasksFor(db.employees, actor, toId) && !coverPeer)
           return { ok: false, error: `${fullName(to)} is outside your reporting line.` };
         task.assigneeIds = Array.from(new Set(task.assigneeIds.filter((a) => a !== fromId).concat(toId)));
@@ -1046,7 +1049,9 @@ function useStoreValue() {
         const monthEnd = `${month}-${String(new Date(y, m, 0).getDate()).padStart(2, "0")}`;
         const holidayDates = db.holidays.map((h) => h.date);
         const wd = workingDays(monthStart, monthEnd, holidayDates);
-        const approvedExpenses = db.expenses.filter((x) => x.status === "APPROVED");
+        // Skip claims already bundled into another (unpaid) run so nothing is reimbursed twice.
+        const bundled = new Set(db.payrollRuns.flatMap((r) => r.expenseIds));
+        const approvedExpenses = db.expenses.filter((x) => x.status === "APPROVED" && !bundled.has(x.id));
         const eligible = db.employees.filter((e) => e.status !== "TERMINATED" && e.joiningDate <= monthEnd);
         const lines = eligible.map((e) => {
           const absent = db.attendance.filter((a) => a.employeeId === e.id && a.date >= monthStart && a.date <= monthEnd && a.status === "ABSENT").length;

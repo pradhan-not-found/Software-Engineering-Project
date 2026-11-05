@@ -8,7 +8,7 @@ import { Bell, Menu, Search, X } from "lucide-react";
 import ProfileDropdown from "@/components/ProfileDropdown";
 import { Avatar, FullPageLoader } from "@/components/ui";
 import { useStore } from "@/lib/store";
-import { cn, fullName, isAdminRole, timeAgo } from "@/lib/utils";
+import { cn, fullName, isAdminRole, resolveLink, timeAgo } from "@/lib/utils";
 
 export interface NavItem {
   name: string;
@@ -39,7 +39,14 @@ export default function AppShell({
 
   useEffect(() => {
     if (!ready) return;
-    if (!user) router.replace(`/login?next=${encodeURIComponent(pathname)}`);
+    if (!user) {
+      let deliberate = false;
+      try {
+        deliberate = sessionStorage.getItem("ems-logged-out") === "1";
+        sessionStorage.removeItem("ems-logged-out");
+      } catch {}
+      router.replace(deliberate ? "/login" : `/login?next=${encodeURIComponent(pathname)}`);
+    }
     else if (!allowed) router.replace("/employee");
   }, [ready, user, allowed, router, pathname]);
 
@@ -195,7 +202,8 @@ function NotificationBell({ base }: { base: string }) {
                 onClick={() => {
                   markRead(n.id);
                   setOpen(false);
-                  if (n.link) router.push(n.link.startsWith("/admin") && base === "/employee" ? `${base}/notifications` : n.link);
+                  const to = user ? resolveLink(n.link, user.role) : null;
+                  if (to) router.push(to);
                 }}
                 className={cn("w-full text-left px-4 py-3 flex gap-3 hover:bg-gray-50 dark:hover:bg-white/5 border-b border-gray-50 dark:border-white/5", !n.read && "bg-blue-50/50 dark:bg-blue-500/5")}
               >

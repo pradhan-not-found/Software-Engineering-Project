@@ -5,7 +5,7 @@ import { useState } from "react";
 import { BellOff, CheckCheck, Download, Trash2, Zap } from "lucide-react";
 import { useAuthed } from "@/lib/store";
 import type { NotificationCategory } from "@/lib/types";
-import { cn, downloadText, fullName, isAdminRole, timeAgo, toCSV } from "@/lib/utils";
+import { cn, downloadText, fullName, isAdminRole, resolveLink, timeAgo, toCSV } from "@/lib/utils";
 import { Avatar, Badge, Button, Card, EmptyState, PageHeader, SearchInput, Select, Table, Tabs, Td, Th } from "@/components/ui";
 
 const CAT_COLOR: Record<NotificationCategory, string> = { HR: "pink", WORK: "blue", SYSTEM: "gray" };
@@ -84,7 +84,8 @@ export default function NotificationsCenter({ variant }: { variant: "admin" | "e
               key={n.id}
               onClick={() => {
                 markRead(n.id);
-                if (n.link && !(variant === "employee" && n.link.startsWith("/admin"))) router.push(n.link);
+                const to = resolveLink(n.link, user.role);
+                if (to) router.push(to);
               }}
               className={cn("w-full text-left flex gap-4 px-5 py-4 hover:bg-gray-50 dark:hover:bg-white/[0.03]", !n.read && "bg-blue-50/40 dark:bg-blue-500/[0.04]")}
             >

@@ -104,6 +104,8 @@ export default function ProfileDropdown() {
             <button
               className="px-4 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center gap-2.5"
               onClick={() => {
+                // Tell the route guard this was a deliberate logout (no ?next= redirect back).
+                try { sessionStorage.setItem("ems-logged-out", "1"); } catch {}
                 logout();
                 router.push("/login");
               }}

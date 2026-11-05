@@ -161,6 +161,18 @@ export function isAdminRole(role: Role) {
   return role === "SUPER_ADMIN" || role === "HR_ADMIN";
 }
 
+/** Map a notification link to a page the given role can actually open. */
+export function resolveLink(link: string | null, role: Role): string | null {
+  if (!link) return null;
+  if (!link.startsWith("/admin") || isAdminRole(role)) return link;
+  if (link.startsWith("/admin/leaves") || link.startsWith("/admin/attendance")) return "/employee/team";
+  if (link.startsWith("/admin/projects")) return "/employee/tasks";
+  if (link.startsWith("/admin/expenses")) return "/employee/expenses";
+  if (link.startsWith("/admin/payroll")) return "/employee/payslips";
+  if (link.startsWith("/admin/performance")) return "/employee/performance";
+  return "/employee/notifications";
+}
+
 /** All employees reporting (directly or indirectly) to managerId. */
 export function getSubordinates(employees: Employee[], managerId: string): Employee[] {
   const result: Employee[] = [];
