@@ -39,6 +39,13 @@ import type {
   Timesheet,
 } from "./types";
 import { createSeed, DB_VERSION, DEMO_PASSWORD, defaultColumns } from "./seed";
+import { isSupabaseConfigured } from "./supabase";
+import {
+  loadFromSupabase,
+  syncEmployeeToSupabase,
+  syncTaskToSupabase,
+  syncLeaveDecisionToSupabase,
+} from "./supabaseSync";
 import {
   addDays,
   canManageTasksFor,
@@ -225,6 +232,16 @@ function useStoreValue() {
       setSessionId(s);
     } catch {
       /* ignore */
+    }
+
+    if (isSupabaseConfigured) {
+      loadFromSupabase(loaded).then((supaDb) => {
+        if (supaDb) {
+          syncStatuses(supaDb);
+          dbRef.current = supaDb;
+          setDb(supaDb);
+        }
+      });
     }
   }, []);
 
@@ -458,6 +475,9 @@ function useStoreValue() {
         if (buddy && buddy !== mgr)
           pushNotification(db, [buddy], "You're an onboarding buddy", `You've been paired with ${fullName(e)} as their buddy.`, "HR", "/employee/tasks");
         pushNotification(db, [id], `Welcome to ${db.org.name}!`, "Your onboarding checklist is ready. Start with uploading your documents.", "HR", "/employee/tasks");
+        if (isSupabaseConfigured) {
+          syncEmployeeToSupabase(e);
+        }
         return { ok: true, data: e };
       });
 
@@ -475,6 +495,9 @@ function useStoreValue() {
         if (managerChanged) {
           pushActivity(db, null, "SYSTEM", "OrgChart", `Reporting line changed for ${fullName(e)} — task permissions re-inherited from the org chart.`, "SYSTEM");
           pushNotification(db, [e.managerId], "New direct report", `${fullName(e)} now reports to you.`, "HR", "/employee/team");
+        }
+        if (isSupabaseConfigured) {
+          syncEmployeeToSupabase(e);
         }
         return { ok: true };
       });
@@ -809,6 +832,9 @@ function useStoreValue() {
             pushActivity(db, null, "SYSTEM", "Task", `${flagged} task(s) assigned to ${fullName(person)} flagged “Delayed — On Leave”.`, "WORK");
           }
         }
+        if (isSupabaseConfigured) {
+          syncLeaveDecisionToSupabase(id, approve ? "APPROVED" : "REJECTED", comment);
+        }
         return { ok: true, data: flagged };
       });
 
@@ -863,6 +889,9 @@ function useStoreValue() {
         pushNotification(db, others, "Task assigned", `${fullName(actor)} assigned you to “${task.title}”${task.dueDate ? ` (due ${formatDate(task.dueDate, false)})` : ""}.`, "WORK", "/employee/tasks");
         if (board.type !== "PERSONAL")
           pushActivity(db, actor.id, "CREATE", "Task", `${fullName(actor)} created “${task.title}” on ${board.title}.`, "WORK");
+        if (isSupabaseConfigured) {
+          syncTaskToSupabase(task);
+        }
         return { ok: true, data: task };
       });
 
@@ -877,6 +906,9 @@ function useStoreValue() {
           pushNotification(db, added, "Task assigned", `${fullName(actor)} assigned you to “${task.title}”.`, "WORK", "/employee/tasks");
         }
         Object.assign(task, patch);
+        if (isSupabaseConfigured) {
+          syncTaskToSupabase(task);
+        }
         return { ok: true };
       });
 
@@ -1222,7 +1254,7 @@ function useStoreValue() {
     };
   }, [mutate, setSession]);
 
-  return { db, user, ready: db !== null, ...actions };
+  return { db, user, ready: db !== null, isSupabaseConfigured, ...actions };
 }
 
 export type Store = ReturnType<typeof useStoreValue>;

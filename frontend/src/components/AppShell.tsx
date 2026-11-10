@@ -30,7 +30,7 @@ export default function AppShell({
   sections: NavSection[];
   children: React.ReactNode;
 }) {
-  const { ready, user } = useStore();
+  const { ready, user, isSupabaseConfigured } = useStore();
   const router = useRouter();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -144,6 +144,17 @@ export default function AppShell({
             <GlobalSearch variant={variant} />
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
+            {isSupabaseConfigured ? (
+              <span className="hidden sm:inline-flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Supabase Live
+              </span>
+            ) : (
+              <span className="hidden sm:inline-flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 font-medium px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20" title="Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to .env.local to go live">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                Local Demo Mode
+              </span>
+            )}
             <NotificationBell base={base} />
             <ProfileDropdown />
           </div>
