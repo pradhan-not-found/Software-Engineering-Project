@@ -6,7 +6,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "node scripts/verify-frontend-all.mjs",
+    "test:page2": "node scripts/verify-frontend-page2.mjs",
+    "test:page3": "node scripts/verify-frontend-page3.mjs",
+    "test:page4": "node scripts/verify-frontend-page4.mjs",
+    "test:page5": "node scripts/verify-frontend-page5.mjs",
+    "test:page6": "node scripts/verify-frontend-page6.mjs",
+    "test:page7": "node scripts/verify-frontend-page7.mjs",
+    "test:all": "node scripts/verify-frontend-all.mjs"
   },
   "dependencies": {
     "@prisma/client": "^7.10.1",
