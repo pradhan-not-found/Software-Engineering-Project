@@ -83,7 +83,19 @@ CREATE TABLE IF NOT EXISTS leaves (
   decided_at TIMESTAMPTZ
 );
 
--- 6. Projects Table
+-- 6. Timesheets Table
+CREATE TABLE IF NOT EXISTS timesheets (
+  id TEXT PRIMARY KEY,
+  employee_id TEXT NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+  week_start DATE NOT NULL,
+  entries JSONB NOT NULL DEFAULT '[]'::jsonb,
+  status TEXT NOT NULL DEFAULT 'DRAFT', -- 'DRAFT', 'SUBMITTED', 'APPROVED', 'REJECTED'
+  submitted_at TIMESTAMPTZ,
+  decided_by TEXT REFERENCES employees(id),
+  CONSTRAINT uq_employee_week UNIQUE (employee_id, week_start)
+);
+
+-- 7. Projects Table
 CREATE TABLE IF NOT EXISTS projects (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,

@@ -727,6 +727,11 @@ function useStoreValue() {
         }
         rec.clockIn = new Date().toISOString();
         rec.status = remote ? "REMOTE" : "PRESENT";
+        fetch("/api/attendance/clock-in", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ remote }),
+        }).catch(() => {});
         return { ok: true };
       });
 
@@ -739,6 +744,7 @@ function useStoreValue() {
         rec.clockOut = new Date().toISOString();
         const hrs = (new Date(rec.clockOut).getTime() - new Date(rec.clockIn).getTime()) / 3600000;
         if (hrs < 4 && rec.status === "PRESENT") rec.status = "HALF_DAY";
+        fetch("/api/attendance/clock-out", { method: "POST" }).catch(() => {});
         return { ok: true };
       });
 
@@ -755,12 +761,22 @@ function useStoreValue() {
           rec.clockOut = new Date(`${date}T18:00:00`).toISOString();
         }
         pushActivity(db, actor?.id ?? null, "UPDATE", "Attendance", `${fullName(actor)} set ${fullName(emp(db, employeeId))}'s attendance on ${formatDate(date)} to ${status}.`, "HR");
+        fetch("/api/attendance", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ employeeId, date, status }),
+        }).catch(() => {});
       });
 
     const setShift = (employeeId: string, shift: string) =>
       mutate((db) => {
         const e = emp(db, employeeId);
         if (e) e.shift = shift;
+        fetch("/api/attendance/shift", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ employeeId, shift }),
+        }).catch(() => {});
       });
 
     const saveTimesheet = (weekStart: string, entries: Timesheet["entries"], submit: boolean): Result =>
@@ -779,6 +795,11 @@ function useStoreValue() {
           ts.submittedAt = new Date().toISOString();
           pushNotification(db, [actor.managerId], "Timesheet submitted", `${fullName(actor)} submitted a timesheet for week of ${formatDate(weekStart)}.`, "HR", "/employee/team");
         } else ts.status = "DRAFT";
+        fetch("/api/timesheets", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ weekStart, entries, submit }),
+        }).catch(() => {});
         return { ok: true };
       });
 
@@ -789,6 +810,11 @@ function useStoreValue() {
         ts.status = approve ? "APPROVED" : "REJECTED";
         ts.decidedBy = actor?.id;
         pushNotification(db, [ts.employeeId], `Timesheet ${approve ? "approved" : "rejected"}`, `Your timesheet for week of ${formatDate(ts.weekStart)} was ${approve ? "approved" : "rejected"} by ${fullName(actor)}.`, "HR", "/employee/attendance");
+        fetch(`/api/timesheets/${id}/decide`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ approve }),
+        }).catch(() => {});
       });
 
     /* ----------------------------- Leaves ----------------------------- */
