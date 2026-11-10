@@ -1223,6 +1223,11 @@ function useStoreValue() {
         db.payrollRuns.push(run);
         db.payrollRuns.sort((a, b) => b.month.localeCompare(a.month));
         pushActivity(db, actor?.id ?? null, "CREATE", "PayrollRun", `${fullName(actor)} generated a draft payroll for ${formatMonth(month)} (${lines.length} employees).`, "SYSTEM");
+        fetch("/api/payroll", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ month }),
+        }).catch(() => {});
         return { ok: true, data: run };
       });
 
@@ -1234,6 +1239,7 @@ function useStoreValue() {
           const e = emp(db, l.employeeId);
           return e ? computePayrollLine(e, { reimbursements: l.reimbursements, lopDays: l.lopDays }) : l;
         });
+        fetch(`/api/payroll/${id}/recalculate`, { method: "POST" }).catch(() => {});
       });
 
     const setPayrollStatus = (id: string, status: "PROCESSED" | "PAID") =>
@@ -1250,11 +1256,17 @@ function useStoreValue() {
           pushNotification(db, run.lines.map((l) => l.employeeId), "Payslip available", `Your payslip for ${formatMonth(run.month)} is ready.`, "HR", "/employee/payslips");
         }
         pushActivity(db, actor?.id ?? null, "UPDATE", "PayrollRun", `${fullName(actor)} marked payroll for ${formatMonth(run.month)} as ${status.toLowerCase()}.`, "SYSTEM");
+        fetch(`/api/payroll/${id}/status`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status }),
+        }).catch(() => {});
       });
 
     const deletePayrollRun = (id: string) =>
       mutate((db) => {
         db.payrollRuns = db.payrollRuns.filter((r) => r.id !== id || r.status !== "DRAFT");
+        fetch(`/api/payroll/${id}`, { method: "DELETE" }).catch(() => {});
       });
 
     const updateSalary = (employeeId: string, salary: SalaryStructure) =>
@@ -1263,6 +1275,11 @@ function useStoreValue() {
         if (!e) return;
         e.salary = salary;
         pushActivity(db, actor?.id ?? null, "UPDATE", "SalaryStructure", `${fullName(actor)} updated the salary structure for ${fullName(e)}.`, "HR");
+        fetch("/api/payroll/salary", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ employeeId, salary }),
+        }).catch(() => {});
       });
 
     /* --------------------------- Performance -------------------------- */
