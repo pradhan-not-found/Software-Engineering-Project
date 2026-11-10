@@ -87,3 +87,4 @@ export function validateSignupInput(body: unknown): ValidationResult<SignupDTO> 
     },
   };
 }
+
