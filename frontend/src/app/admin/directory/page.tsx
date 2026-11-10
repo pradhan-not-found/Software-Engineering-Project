@@ -31,7 +31,7 @@ export default function DirectoryPage() {
     const s = q.toLowerCase().trim();
     const list = db.employees.filter(
       (e) =>
-        (!s || `${fullName(e)} ${e.email} ${e.designation} ${e.code} ${e.skills.join(" ")}`.toLowerCase().includes(s)) &&
+        (!s || `${fullName(e)} ${e.email} ${e.designation} ${e.code} ${(e.skills || []).join(" ")}`.toLowerCase().includes(s)) &&
         (dept === "all" || e.departmentId === dept) &&
         (status === "all" || e.status === status) &&
         (role === "all" || e.role === role),
