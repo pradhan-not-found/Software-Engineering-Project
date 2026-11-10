@@ -174,3 +174,4 @@ console.log(`PAGE 3 SUMMARY: ${passed} Passed, ${failed} Failed (100% SUCCESS)`)
 console.log("==================================================================");
 
 if (failed > 0) process.exit(1);
+
