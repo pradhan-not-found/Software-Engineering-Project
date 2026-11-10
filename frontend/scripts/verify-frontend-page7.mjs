@@ -45,6 +45,15 @@ console.log("\n[3. Connected Store Integration]");
 assert(storeCode.includes("decideLeave"), "Store exposes decideLeave action");
 assert(storeCode.includes("decideExpense"), "Store exposes decideExpense action");
 assert(storeCode.includes("suggestPeers"), "Store exposes suggestPeers helper");
+assert(storeCode.includes("fetchDashboardOverview"), "Store exposes fetchDashboardOverview helper");
+assert(storeCode.includes("/api/dashboard/overview"), "Store connects with /api/dashboard/overview REST route");
+
+console.log("\n[4. Layer 4: REST API Route Handler Wireup]");
+const overviewRouteCode = readFileSync(resolve("src/app/api/dashboard/overview/route.ts"), "utf-8");
+assert(overviewRouteCode.includes("GET"), "GET /api/dashboard/overview route handler defined");
+assert(overviewRouteCode.includes("authService.getSessionUser"), "Route handler enforces session authentication");
+assert(overviewRouteCode.includes("validateDashboardFilterInput"), "Route handler enforces input validation schema");
+assert(overviewRouteCode.includes("dashboardService.getOverview"), "Route handler calls Layer 3 domain service");
 
 console.log("\n==================================================================");
 console.log(`PAGE 7 FRONTEND SUMMARY: ${passed} Passed, ${failed} Failed (${failed === 0 ? "100% SUCCESS" : "FAILURES DETECTED"})`);

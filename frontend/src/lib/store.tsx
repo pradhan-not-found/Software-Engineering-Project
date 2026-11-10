@@ -1372,6 +1372,23 @@ function useStoreValue() {
         db.notifications = db.notifications.filter((n: Notification) => n.recipientId !== actor?.id);
       });
 
+    const fetchDashboardOverview = async (filter?: { date?: string; category?: "ALL" | "HR" | "WORK" | "SYSTEM" }) => {
+      try {
+        const params = new URLSearchParams();
+        if (filter?.date) params.set("date", filter.date);
+        if (filter?.category) params.set("category", filter.category);
+        const res = await fetch(`/api/dashboard/overview?${params.toString()}`);
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          return { ok: false as const, error: err.error || "Failed to fetch dashboard overview." };
+        }
+        const json = await res.json();
+        return { ok: true as const, data: json.data };
+      } catch (err: any) {
+        return { ok: false as const, error: err.message || "Network error fetching overview." };
+      }
+    };
+
     return {
       login, logout, signup, changePassword, resetDemo,
       addEmployee, updateEmployee, completeOnboarding, toggleOnboardingDoc, setOfferStatus,
@@ -1386,6 +1403,7 @@ function useStoreValue() {
       generatePayroll, recalcPayroll, setPayrollStatus, deletePayrollRun, updateSalary,
       saveGoal, deleteGoal, createCycle, closeCycle, submitSelfReview, submitManagerReview, addPeerFeedback,
       markRead, markAllRead, clearNotifications,
+      fetchDashboardOverview,
     };
   }, [mutate, setSession]);
 
