@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS leaves (
   decided_at TIMESTAMPTZ
 );
 
--- 6. Timesheets Table
+-- 7. Timesheets Table
 CREATE TABLE IF NOT EXISTS timesheets (
   id TEXT PRIMARY KEY,
   employee_id TEXT NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
@@ -95,7 +95,19 @@ CREATE TABLE IF NOT EXISTS timesheets (
   CONSTRAINT uq_employee_week UNIQUE (employee_id, week_start)
 );
 
--- 7. Projects Table
+-- 8. Payroll Runs Table
+CREATE TABLE IF NOT EXISTS payroll_runs (
+  id TEXT PRIMARY KEY,
+  month TEXT NOT NULL UNIQUE,
+  status TEXT NOT NULL DEFAULT 'DRAFT', -- 'DRAFT', 'PROCESSED', 'PAID'
+  lines JSONB NOT NULL DEFAULT '[]'::jsonb,
+  expense_ids JSONB NOT NULL DEFAULT '[]'::jsonb,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  processed_at TIMESTAMPTZ,
+  paid_at TIMESTAMPTZ
+);
+
+-- 9. Projects Table
 CREATE TABLE IF NOT EXISTS projects (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,

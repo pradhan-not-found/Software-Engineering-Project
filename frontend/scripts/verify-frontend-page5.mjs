@@ -58,3 +58,4 @@ console.log(`PAGE 5 FRONTEND SUMMARY: ${passed} Passed, ${failed} Failed`);
 console.log("==================================================================");
 
 if (failed > 0) process.exit(1);
+
