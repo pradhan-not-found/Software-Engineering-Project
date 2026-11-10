@@ -947,6 +947,11 @@ function useStoreValue() {
         pushNotification(db, others, "Task assigned", `${fullName(actor)} assigned you to “${task.title}”${task.dueDate ? ` (due ${formatDate(task.dueDate, false)})` : ""}.`, "WORK", "/employee/tasks");
         if (board.type !== "PERSONAL")
           pushActivity(db, actor.id, "CREATE", "Task", `${fullName(actor)} created “${task.title}” on ${board.title}.`, "WORK");
+        fetch("/api/tasks", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(input),
+        }).catch(() => {});
         if (isSupabaseConfigured) {
           syncTaskToSupabase(task);
         }
@@ -964,6 +969,11 @@ function useStoreValue() {
           pushNotification(db, added, "Task assigned", `${fullName(actor)} assigned you to “${task.title}”.`, "WORK", "/employee/tasks");
         }
         Object.assign(task, patch);
+        fetch(`/api/tasks/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(patch),
+        }).catch(() => {});
         if (isSupabaseConfigured) {
           syncTaskToSupabase(task);
         }
@@ -1009,11 +1019,20 @@ function useStoreValue() {
         } else if (!nowDone && wasDone) {
           task.completedAt = null;
         }
+        fetch(`/api/tasks/${id}/move`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ columnId, beforeId }),
+        }).catch(() => {});
+        if (isSupabaseConfigured) {
+          syncTaskToSupabase(task);
+        }
       });
 
     const deleteTask = (id: string) =>
       mutate((db) => {
         db.tasks = db.tasks.filter((t) => t.id !== id);
+        fetch(`/api/tasks/${id}`, { method: "DELETE" }).catch(() => {});
       });
 
     const addComment = (taskId: string, text: string) =>
@@ -1023,6 +1042,11 @@ function useStoreValue() {
         task.comments.push({ id: uid("c"), authorId: actor.id, text: text.trim(), at: new Date().toISOString() });
         const mentions = [...task.assigneeIds, task.creatorId].filter((x) => x !== actor.id);
         pushNotification(db, mentions, "New comment", `${fullName(actor)} commented on “${task.title}”.`, "WORK", "/employee/tasks");
+        fetch(`/api/tasks/${taskId}/comments`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text }),
+        }).catch(() => {});
       });
 
     const addAttachment = (taskId: string, name: string, size: number) =>
@@ -1066,6 +1090,11 @@ function useStoreValue() {
         db.boards.push({ id: boardId, title: p.name, type: "PROJECT", projectId: p.id, ownerId: null, columns: defaultColumns(boardId), createdAt: new Date().toISOString() });
         pushActivity(db, actor?.id ?? null, "CREATE", "Project", `${fullName(actor)} created project “${p.name}”.`, "WORK");
         pushNotification(db, [p.leadId], "Project lead", `You are the lead for the new project “${p.name}”.`, "WORK", "/admin/projects");
+        fetch("/api/projects", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(input),
+        }).catch(() => {});
         return { ok: true, data: p };
       });
 
@@ -1076,6 +1105,11 @@ function useStoreValue() {
         Object.assign(p, patch);
         const b = db.boards.find((x) => x.projectId === id);
         if (b && patch.name) b.title = patch.name;
+        fetch(`/api/projects`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id, ...patch }),
+        }).catch(() => {});
       });
 
     const addColumn = (boardId: string, name: string, category: ColumnCategory) =>
