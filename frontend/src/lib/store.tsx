@@ -234,6 +234,17 @@ function useStoreValue() {
       /* ignore */
     }
 
+    // Verify server session
+    fetch("/api/auth/me")
+      .then((r) => r.json())
+      .then((res) => {
+        if (res.ok && res.user) {
+          sessionRef.current = res.user.id;
+          setSessionId(res.user.id);
+        }
+      })
+      .catch(() => {});
+
     if (isSupabaseConfigured) {
       loadFromSupabase(loaded).then((supaDb) => {
         if (supaDb) {
@@ -280,7 +291,30 @@ function useStoreValue() {
 
   const actions = useMemo(() => {
     /* ------------------------------ Auth ------------------------------ */
-    const login = (email: string, password: string): Result<Employee> => {
+    const login = async (email: string, password: string): Promise<Result<Employee>> => {
+      // 1. Authenticate with backend API Route Handler & set session cookie
+      try {
+        const res = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+        const data = await res.json();
+        if (data.ok && data.user) {
+          mutate((db) => {
+            const exists = db.employees.some((x) => x.id === data.user.id);
+            if (!exists) db.employees.push(data.user);
+          });
+          setSession(data.user.id);
+          return { ok: true, data: data.user };
+        } else if (!data.ok && data.error && !data.error.includes("Internal server error")) {
+          return { ok: false, error: data.error };
+        }
+      } catch {
+        // Fallback to local memory login if server is offline or unreachable
+      }
+
+      // 2. Local memory fallback
       const d = dbRef.current;
       if (!d) return { ok: false, error: "App is still loading." };
       const e = d.employees.find((x) => x.email.toLowerCase() === email.trim().toLowerCase());
@@ -291,7 +325,10 @@ function useStoreValue() {
       return { ok: true, data: e };
     };
 
-    const logout = () => setSession(null);
+    const logout = () => {
+      fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
+      setSession(null);
+    };
 
     const signup = (input: { name: string; email: string; password: string; orgName: string }): Result<Employee> => {
       const d = dbRef.current;

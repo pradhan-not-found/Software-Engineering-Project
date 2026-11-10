@@ -18,6 +18,7 @@ function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const pickDemo = (value: string) => {
     setDemo(value);
@@ -26,16 +27,24 @@ function LoginForm() {
     setPassword(value ? DEMO_PASSWORD : "");
   };
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     if (!email || !password) return setError("Please enter your email and password.");
-    const res = login(email, password);
-    if (!res.ok) return setError(res.error);
-    const next = params.get("next");
-    const admin = isAdminRole(res.data!.role);
-    if (next && next.startsWith("/") && (!next.startsWith("/admin") || admin)) router.push(next);
-    else router.push(admin ? "/admin" : "/employee");
+    setLoading(true);
+    try {
+      const res = await login(email, password);
+      if (!res.ok) {
+        setError(res.error);
+        return;
+      }
+      const next = params.get("next");
+      const admin = isAdminRole(res.data!.role);
+      if (next && next.startsWith("/") && (!next.startsWith("/admin") || admin)) router.push(next);
+      else router.push(admin ? "/admin" : "/employee");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -76,10 +85,10 @@ function LoginForm() {
 
         <button
           type="submit"
-          disabled={!ready}
+          disabled={!ready || loading}
           className="mt-4 w-full bg-black dark:bg-white text-white dark:text-black text-sm font-semibold px-8 py-3.5 rounded-xl hover:bg-gray-900 dark:hover:bg-gray-200 transition-colors shadow-lg dark:shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-xl dark:hover:shadow-[0_0_30px_rgba(255,255,255,0.2)] flex items-center justify-center disabled:opacity-60"
         >
-          Log in
+          {loading ? "Signing in…" : "Log in"}
         </button>
       </form>
     </div>
