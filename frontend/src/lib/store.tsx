@@ -823,6 +823,11 @@ function useStoreValue() {
         const load = openTasksFor(db, actor.id).filter((t) => t.dueDate && t.dueDate >= input.startDate && t.dueDate <= input.endDate).length;
         pushNotification(db, [actor.managerId, ...adminIds(db)], "Leave request", `${fullName(actor)} requested ${days} day(s) of ${LEAVE_TYPES[input.type].label} (${formatDate(input.startDate, false)} – ${formatDate(input.endDate, false)}).${load ? ` ${load} task(s) due in that window.` : ""}`, "HR", "/admin/leaves");
         pushActivity(db, actor.id, "CREATE", "LeaveRequest", `${fullName(actor)} requested ${days} day(s) of ${LEAVE_TYPES[input.type].label}.`, "HR");
+        fetch("/api/leaves", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(input),
+        }).catch(() => {});
         return { ok: true };
       });
 
@@ -832,6 +837,7 @@ function useStoreValue() {
         if (!l || l.employeeId !== actor?.id || l.status !== "PENDING") return;
         l.status = "CANCELLED";
         pushActivity(db, actor.id, "UPDATE", "LeaveRequest", `${fullName(actor)} cancelled a leave request.`, "HR");
+        fetch(`/api/leaves/${id}/cancel`, { method: "POST" }).catch(() => {});
       });
 
     const decideLeave = (id: string, approve: boolean, comment = ""): Result<number> =>
@@ -879,6 +885,11 @@ function useStoreValue() {
             pushActivity(db, null, "SYSTEM", "Task", `${flagged} task(s) assigned to ${fullName(person)} flagged “Delayed — On Leave”.`, "WORK");
           }
         }
+        fetch(`/api/leaves/${id}/decide`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ approve, comment }),
+        }).catch(() => {});
         if (isSupabaseConfigured) {
           syncLeaveDecisionToSupabase(id, approve ? "APPROVED" : "REJECTED", comment);
         }
