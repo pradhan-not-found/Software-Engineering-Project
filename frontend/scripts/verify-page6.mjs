@@ -198,3 +198,4 @@ console.log(`PAGE 6 SUMMARY: ${passed} Passed, ${failed} Failed (${failed === 0 
 console.log("==================================================================");
 
 if (failed > 0) process.exit(1);
+

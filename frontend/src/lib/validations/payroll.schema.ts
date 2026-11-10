@@ -90,3 +90,4 @@ export function validateUpdateSalaryInput(body: unknown): { ok: true; data: Upda
     },
   };
 }
+

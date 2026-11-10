@@ -310,6 +310,8 @@ export interface ActivityLog {
   at: string;
 }
 
+export type ActivityItem = ActivityLog;
+
 export type ModuleKey =
   | "directory"
   | "orgchart"
