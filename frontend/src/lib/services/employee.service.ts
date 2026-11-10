@@ -6,7 +6,8 @@
 import { employeeRepository } from "../repositories/employee.repository";
 import type { Employee, Board, BoardColumn, Task, Priority } from "../types";
 import type { NewHireDTO } from "../validations/employee.schema";
-import { uid, addDays, defaultColumns, DEMO_PASSWORD } from "../utils";
+import { uid, addDays } from "../utils";
+import { defaultColumns, DEMO_PASSWORD } from "../seed";
 
 export class EmployeeService {
   /**

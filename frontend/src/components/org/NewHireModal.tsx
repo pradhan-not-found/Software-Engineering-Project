@@ -21,21 +21,27 @@ export default function NewHireModal({ open, onClose }: { open: boolean; onClose
   };
   const [f, setF] = useState<NewHireInput>(blank);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const set = <K extends keyof NewHireInput>(k: K, v: NewHireInput[K]) => setF((p) => ({ ...p, [k]: v }));
   const active = db.employees.filter((e) => e.status !== "TERMINATED");
 
-  const submit = () => {
+  const submit = async () => {
     if (!f.firstName.trim() || !f.lastName.trim()) return setError("First and last name are required.");
     if (!/^\S+@\S+\.\S+$/.test(f.email)) return setError("Enter a valid email address.");
     if (!f.designation.trim()) return setError("Designation is required.");
     if (!(f.basicSalary > 0)) return setError("Enter a valid basic salary.");
-    const res = addEmployee(f);
-    if (!res.ok) return setError(res.error);
-    toast(`${fullName(res.data)} added — onboarding board with 9 tasks auto-generated.`);
-    setF(blank);
-    setError(null);
-    onClose();
-    if (res.data) router.push(`/admin/directory/${res.data.id}`);
+    setLoading(true);
+    try {
+      const res = await addEmployee(f);
+      if (!res.ok) return setError(res.error);
+      toast(`${fullName(res.data)} added — onboarding board with 9 tasks auto-generated.`);
+      setF(blank);
+      setError(null);
+      onClose();
+      if (res.data) router.push(`/admin/directory/${res.data.id}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -47,8 +53,8 @@ export default function NewHireModal({ open, onClose }: { open: boolean; onClose
       subtitle="Creates the employee record, allocates assets and auto-generates an onboarding Kanban board."
       footer={
         <>
-          <Button variant="secondary" onClick={onClose}>Cancel</Button>
-          <Button onClick={submit}>Add & start onboarding</Button>
+          <Button variant="secondary" onClick={onClose} disabled={loading}>Cancel</Button>
+          <Button onClick={submit} disabled={loading}>{loading ? "Adding & creating onboarding board…" : "Add & start onboarding"}</Button>
         </>
       }
     >

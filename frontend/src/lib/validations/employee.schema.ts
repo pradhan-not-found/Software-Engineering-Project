@@ -74,7 +74,10 @@ export function validateNewHireInput(body: unknown): ValidationResult<NewHireDTO
     ? b.joiningDate
     : new Date().toISOString().slice(0, 10);
 
-  const assets = Array.isArray(b.assets) ? (b.assets as Asset["type"][]) : ["Laptop", "ID Card"];
+  const VALID_ASSETS: Asset["type"][] = ["Laptop", "ID Card", "Access Card", "Monitor", "Phone", "Headset"];
+  const assets: Asset["type"][] = Array.isArray(b.assets)
+    ? (b.assets.filter((a): a is Asset["type"] => VALID_ASSETS.includes(a as Asset["type"])))
+    : ["Laptop", "ID Card"];
 
   return {
     ok: true,

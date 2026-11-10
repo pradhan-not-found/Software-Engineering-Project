@@ -31,3 +31,4 @@ export class DepartmentRepository {
 }
 
 export const departmentRepository = new DepartmentRepository();
+

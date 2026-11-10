@@ -512,6 +512,11 @@ function useStoreValue() {
         if (buddy && buddy !== mgr)
           pushNotification(db, [buddy], "You're an onboarding buddy", `You've been paired with ${fullName(e)} as their buddy.`, "HR", "/employee/tasks");
         pushNotification(db, [id], `Welcome to ${db.org.name}!`, "Your onboarding checklist is ready. Start with uploading your documents.", "HR", "/employee/tasks");
+        fetch("/api/employees", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(input),
+        }).catch(() => {});
         if (isSupabaseConfigured) {
           syncEmployeeToSupabase(e);
         }
@@ -533,6 +538,11 @@ function useStoreValue() {
           pushActivity(db, null, "SYSTEM", "OrgChart", `Reporting line changed for ${fullName(e)} — task permissions re-inherited from the org chart.`, "SYSTEM");
           pushNotification(db, [e.managerId], "New direct report", `${fullName(e)} now reports to you.`, "HR", "/employee/team");
         }
+        fetch(`/api/employees/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(patch),
+        }).catch(() => {});
         if (isSupabaseConfigured) {
           syncEmployeeToSupabase(e);
         }
