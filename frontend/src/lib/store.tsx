@@ -1169,18 +1169,30 @@ function useStoreValue() {
       });
 
     /* ---------------------------- Expenses ---------------------------- */
-    const submitExpense = (input: Omit<Expense, "id" | "employeeId" | "status" | "createdAt">): Result =>
-      mutate((db, actor) => {
+    const submitExpense = (input: Omit<Expense, "id" | "employeeId" | "status" | "createdAt">): Result => {
+      const res = mutate<Result>((db, actor) => {
         if (!actor) return { ok: false, error: "Not signed in." };
         if (!(input.amount > 0)) return { ok: false, error: "Enter a valid amount." };
         if (!input.description.trim()) return { ok: false, error: "Add a short description." };
-        db.expenses.unshift({ ...input, id: uid("x"), employeeId: actor.id, status: "PENDING", createdAt: new Date().toISOString() });
+        const id = uid("x");
+        db.expenses.unshift({ ...input, id, employeeId: actor.id, status: "PENDING", createdAt: new Date().toISOString() });
         pushNotification(db, adminIds(db), "Expense claim", `${fullName(actor)} submitted a ${input.category.toLowerCase()} claim of ${money(input.amount)}.`, "HR", "/admin/expenses");
         pushActivity(db, actor.id, "CREATE", "Expense", `${fullName(actor)} submitted an expense claim of ${money(input.amount)}.`, "HR");
         return { ok: true };
       });
 
-    const decideExpense = (id: string, approve: boolean) =>
+      if (res.ok) {
+        fetch("/api/expenses", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(input),
+        }).catch((err) => console.error("API submit expense error:", err));
+      }
+
+      return res;
+    };
+
+    const decideExpense = (id: string, approve: boolean) => {
       mutate((db, actor) => {
         const x = db.expenses.find((e) => e.id === id);
         if (!x || x.status !== "PENDING") return;
@@ -1189,6 +1201,23 @@ function useStoreValue() {
         pushNotification(db, [x.employeeId], `Expense ${approve ? "approved" : "rejected"}`, `Your ${x.category.toLowerCase()} claim of ${money(x.amount)} was ${approve ? "approved — it will be paid with the next payroll" : "rejected"}.`, "HR", "/employee/expenses");
         pushActivity(db, actor?.id ?? null, approve ? "APPROVE" : "REJECT", "Expense", `${fullName(actor)} ${approve ? "approved" : "rejected"} ${fullName(emp(db, x.employeeId))}'s claim of ${money(x.amount)}.`, "HR");
       });
+
+      fetch(`/api/expenses/${id}/decide`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: approve ? "APPROVED" : "REJECTED" }),
+      }).catch((err) => console.error("API decide expense error:", err));
+    };
+
+    const deleteExpense = (id: string) => {
+      mutate((db) => {
+        db.expenses = db.expenses.filter((x) => x.id !== id);
+      });
+
+      fetch(`/api/expenses/${id}`, {
+        method: "DELETE",
+      }).catch((err) => console.error("API delete expense error:", err));
+    };
 
     /* ----------------------------- Payroll ---------------------------- */
     const generatePayroll = (month: string): Result<PayrollRun> =>
@@ -1399,7 +1428,7 @@ function useStoreValue() {
       requestLeave, cancelLeave, decideLeave, addHoliday, removeHoliday,
       createTask, updateTask, moveTask, deleteTask, addComment, addAttachment, removeAttachment, reassignTask,
       createProject, updateProject, addColumn, renameColumn, removeColumn,
-      submitExpense, decideExpense,
+      submitExpense, decideExpense, deleteExpense,
       generatePayroll, recalcPayroll, setPayrollStatus, deletePayrollRun, updateSalary,
       saveGoal, deleteGoal, createCycle, closeCycle, submitSelfReview, submitManagerReview, addPeerFeedback,
       markRead, markAllRead, clearNotifications,

@@ -14,6 +14,7 @@ const suites = [
   { name: "Frontend Page 5: Attendance & Timesheets", script: "verify-frontend-page5.mjs" },
   { name: "Frontend Page 6: Payroll & Payslips", script: "verify-frontend-page6.mjs" },
   { name: "Frontend Page 7: Admin Overview Dashboard", script: "verify-frontend-page7.mjs" },
+  { name: "Frontend Page 8: Expenses & Reimbursements", script: "verify-frontend-page8.mjs" },
 ];
 
 console.log("================================================================================");
@@ -50,7 +51,7 @@ console.log("===================================================================
 console.log(`  Total Suites Executed : ${suites.length}`);
 console.log(`  Passed Suites         : ${totalPassedSuites}`);
 console.log(`  Failed Suites         : ${totalFailedSuites}`);
-console.log(`  Status                : ${totalFailedSuites === 0 ? "ALL 6 FRONTEND SUITES PASSED (100%)" : "FAILURES ENCOUNTERED"}`);
+console.log(`  Status                : ${totalFailedSuites === 0 ? `ALL ${totalPassedSuites} FRONTEND SUITES PASSED (100%)` : "FAILURES ENCOUNTERED"}`);
 console.log("================================================================================\n");
 
 if (totalFailedSuites > 0) {

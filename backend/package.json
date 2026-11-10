@@ -14,6 +14,7 @@
     "test:page5": "node scripts/verify-page5.mjs",
     "test:page6": "node scripts/verify-page6.mjs",
     "test:page7": "node scripts/verify-page7.mjs",
+    "test:page8": "node scripts/verify-page8.mjs",
     "test:all": "node scripts/verify-all.mjs"
   },
   "keywords": [

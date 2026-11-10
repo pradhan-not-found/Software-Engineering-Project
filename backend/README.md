@@ -71,7 +71,8 @@ backend/
 │   ├── verify-page5.mjs           # Page 5: Attendance, Shifts & Policies (16 tests)
 │   ├── verify-page6.mjs           # Page 6: Payroll, LOP & Payslips (16 tests)
 │   ├── verify-page7.mjs           # Page 7: Admin Overview Dashboard (14 tests)
-│   └── verify-all.mjs             # Unified Master Test Runner (135 tests)
+│   ├── verify-page8.mjs           # Page 8: Expenses & Reimbursements (19 tests)
+│   └── verify-all.mjs             # Unified Master Test Runner (154 tests)
 └── src/
     ├── index.ts                   # Master package export barrel
     ├── types.ts                   # Domain entity type definitions & contracts
@@ -90,7 +91,8 @@ backend/
     │   ├── project.schema.ts
     │   ├── attendance.schema.ts
     │   ├── payroll.schema.ts
-    │   └── dashboard.schema.ts
+    │   ├── dashboard.schema.ts
+    │   └── expense.schema.ts
     ├── repositories/              # Layer 2: Data Access Layer (DAL)
     │   ├── user.repository.ts
     │   ├── employee.repository.ts
@@ -101,7 +103,8 @@ backend/
     │   ├── attendance.repository.ts
     │   ├── timesheet.repository.ts
     │   ├── payroll.repository.ts
-    │   └── dashboard.repository.ts
+    │   ├── dashboard.repository.ts
+    │   └── expense.repository.ts
     └── services/                  # Layer 3: Domain Services & Connected Wedge
         ├── auth.service.ts
         ├── employee.service.ts
@@ -111,7 +114,8 @@ backend/
         ├── attendance.service.ts
         ├── timesheet.service.ts
         ├── payroll.service.ts
-        └── dashboard.service.ts
+        ├── dashboard.service.ts
+        └── expense.service.ts
 ```
 
 ---
@@ -128,6 +132,7 @@ The **Connected Wedge** is the core differentiating architecture of Workplace EM
 | **#4: Attendance & Half-Day** | Attendance / Shifts | HR Payroll | Enforces anti-double clock-in rules. Shifts with elapsed work under 4 hours are automatically converted to `HALF_DAY`. Timesheets with 0 hours logged are strictly rejected. |
 | **#5: Loss of Pay (LOP)** | Attendance + Leaves | Payroll Runs | Automatically aggregates unpaid leaves (`UNPAID`, `SICK`, absent days) to compute pro-rata Loss of Pay deductions against gross salary, enforces statutory Provident Fund (PF capped at ₹1,800) and Professional Tax (₹200), and locks processed runs against tampering. |
 | **#6: Executive Signals** | All Domains | Overview Dashboard | Aggregates active headcount, real-time organizational operating capacity %, live clock-ins, unified approvals inbox, and live workload collision warnings for managers. |
+| **#7: Expense Reimbursements** | Expenses | Payroll Runs | Approved employee expense claims are bundled into the next monthly payroll run under `reimbursements` for payout, transitioning claims from `APPROVED` to `REIMBURSED` upon execution. |
 
 ---
 

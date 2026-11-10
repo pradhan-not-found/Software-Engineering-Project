@@ -6,4 +6,4 @@ export * from "./project.schema";
 export * from "./attendance.schema";
 export * from "./payroll.schema";
 export * from "./dashboard.schema";
-
+export * from "./expense.schema";

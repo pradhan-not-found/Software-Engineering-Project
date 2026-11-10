@@ -16,6 +16,7 @@ const suites = [
   { name: "Page 5: Attendance, Timesheets & Shift Policy Enforcement", script: "verify-page5.mjs" },
   { name: "Page 6: Payroll, Salary Structures & Loss of Pay (LOP) Engine", script: "verify-page6.mjs" },
   { name: "Page 7: Admin Overview Dashboard & Executive Analytics", script: "verify-page7.mjs" },
+  { name: "Page 8: Expenses, Reimbursements & Connected Payroll Linking", script: "verify-page8.mjs" },
 ];
 
 console.log("================================================================================");
@@ -51,7 +52,7 @@ console.log("===================================================================
 console.log(`  Total Suites Executed : ${suites.length}`);
 console.log(`  Passed Suites         : ${totalPassedSuites}`);
 console.log(`  Failed Suites         : ${totalFailedSuites}`);
-console.log(`  Status                : ${totalFailedSuites === 0 ? "ALL 8 BACKEND SUITES PASSED (100%)" : "FAILURES ENCOUNTERED"}`);
+console.log(`  Status                : ${totalFailedSuites === 0 ? `ALL ${totalPassedSuites} BACKEND SUITES PASSED (100%)` : "FAILURES ENCOUNTERED"}`);
 console.log("================================================================================\n");
 
 if (totalFailedSuites > 0) {

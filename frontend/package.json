@@ -14,6 +14,7 @@
     "test:page5": "node scripts/verify-frontend-page5.mjs",
     "test:page6": "node scripts/verify-frontend-page6.mjs",
     "test:page7": "node scripts/verify-frontend-page7.mjs",
+    "test:page8": "node scripts/verify-frontend-page8.mjs",
     "test:all": "node scripts/verify-frontend-all.mjs"
   },
   "dependencies": {

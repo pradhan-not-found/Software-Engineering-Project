@@ -7,4 +7,4 @@ export * from "./attendance.service";
 export * from "./timesheet.service";
 export * from "./payroll.service";
 export * from "./dashboard.service";
-
+export * from "./expense.service";

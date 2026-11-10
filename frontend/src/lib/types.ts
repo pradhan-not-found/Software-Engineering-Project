@@ -208,11 +208,12 @@ export interface Task {
   order: number;
 }
 
+export type ExpenseCategory = "Travel" | "Meals" | "Equipment" | "Internet" | "Training" | "Other";
 export type ExpenseStatus = "PENDING" | "APPROVED" | "REJECTED" | "REIMBURSED";
 export interface Expense {
   id: string;
   employeeId: string;
-  category: "Travel" | "Meals" | "Equipment" | "Internet" | "Training" | "Other";
+  category: ExpenseCategory;
   amount: number;
   date: string;
   description: string;

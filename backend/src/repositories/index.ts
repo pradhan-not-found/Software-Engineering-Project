@@ -8,4 +8,4 @@ export * from "./attendance.repository";
 export * from "./timesheet.repository";
 export * from "./payroll.repository";
 export * from "./dashboard.repository";
-
+export * from "./expense.repository";
