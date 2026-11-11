@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Bell, Menu, Search, X } from "lucide-react";
 import ProfileDropdown from "@/components/ProfileDropdown";
+import TechText from "@/components/TechText";
 import { Avatar, FullPageLoader } from "@/components/ui";
 import { useStore } from "@/lib/store";
 import { cn, fullName, isAdminRole, resolveLink, timeAgo } from "@/lib/utils";
@@ -145,14 +146,54 @@ export default function AppShell({
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
             {isSupabaseConfigured ? (
-              <span className="hidden sm:inline-flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Supabase Live
+              <span className="hidden sm:inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/[0.08] dark:bg-emerald-950/40 border border-emerald-500/30 dark:border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.15)] backdrop-blur-sm transition-all hover:border-emerald-400 hover:shadow-[0_0_16px_rgba(16,185,129,0.25)]">
+                <span className="relative flex h-2 w-2 items-center justify-center flex-shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500 shadow-[0_0_6px_#10b981]" />
+                </span>
+                <div style={{ width: "96px", height: "18px", position: "relative" }}>
+                  <TechText
+                    text="Supabase Live"
+                    fontWeight={600}
+                    fontSize={12}
+                    letterSpacing={-0.02}
+                    reveal="letter"
+                    dashLength={3}
+                    dashGap={1.5}
+                    specks={6}
+                    intro="none"
+                    clickKick
+                    guides={false}
+                    color="#10b981"
+                    accentColor="#34d399"
+                  />
+                </div>
               </span>
             ) : (
-              <span className="hidden sm:inline-flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 font-medium px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20" title="Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to .env.local to go live">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                Local Demo Mode
+              <span
+                className="hidden sm:inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/[0.08] dark:bg-amber-950/40 border border-amber-500/30 dark:border-amber-500/40 shadow-[0_0_12px_rgba(245,158,11,0.15)] backdrop-blur-sm transition-all hover:border-amber-400 hover:shadow-[0_0_16px_rgba(245,158,11,0.25)]"
+                title="Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to .env.local to go live"
+              >
+                <span className="relative flex h-2 w-2 items-center justify-center flex-shrink-0">
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-500 shadow-[0_0_6px_#f59e0b]" />
+                </span>
+                <div style={{ width: "110px", height: "18px", position: "relative" }}>
+                  <TechText
+                    text="Local Demo Mode"
+                    fontWeight={600}
+                    fontSize={12}
+                    letterSpacing={-0.02}
+                    reveal="letter"
+                    dashLength={3}
+                    dashGap={1.5}
+                    specks={6}
+                    intro="none"
+                    clickKick
+                    guides={false}
+                    color="#f59e0b"
+                    accentColor="#fbbf24"
+                  />
+                </div>
               </span>
             )}
             <NotificationBell base={base} />
