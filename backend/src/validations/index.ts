@@ -7,3 +7,4 @@ export * from "./attendance.schema";
 export * from "./payroll.schema";
 export * from "./dashboard.schema";
 export * from "./expense.schema";
+export * from "./performance.schema";

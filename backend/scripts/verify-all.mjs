@@ -17,6 +17,7 @@ const suites = [
   { name: "Page 6: Payroll, Salary Structures & Loss of Pay (LOP) Engine", script: "verify-page6.mjs" },
   { name: "Page 7: Admin Overview Dashboard & Executive Analytics", script: "verify-page7.mjs" },
   { name: "Page 8: Expenses, Reimbursements & Connected Payroll Linking", script: "verify-page8.mjs" },
+  { name: "Page 9: Performance Management & Connected Objective Delivery Engine", script: "verify-page9.mjs" },
 ];
 
 console.log("================================================================================");

@@ -4,6 +4,7 @@
  */
 
 import type { LeaveTypeKey } from "../types";
+import type { ValidationResult } from "./auth.schema";
 
 export interface LeaveRequestDTO {
   type: LeaveTypeKey;
@@ -16,10 +17,6 @@ export interface LeaveDecisionDTO {
   approve: boolean;
   comment?: string;
 }
-
-export type ValidationResult<T> =
-  | { ok: true; data: T }
-  | { ok: false; error: string };
 
 const VALID_LEAVE_TYPES: LeaveTypeKey[] = ["ANNUAL", "SICK", "CASUAL", "PARENTAL", "UNPAID"];
 

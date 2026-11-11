@@ -9,3 +9,4 @@ export * from "./timesheet.repository";
 export * from "./payroll.repository";
 export * from "./dashboard.repository";
 export * from "./expense.repository";
+export * from "./performance.repository";

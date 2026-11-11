@@ -4,6 +4,7 @@
  */
 
 import type { Role, Employee, Asset } from "../types";
+import type { ValidationResult } from "./auth.schema";
 
 export interface NewHireDTO {
   firstName: string;
@@ -22,10 +23,6 @@ export interface NewHireDTO {
   basicSalary: number;
   assets: Asset["type"][];
 }
-
-export type ValidationResult<T> =
-  | { ok: true; data: T }
-  | { ok: false; error: string };
 
 export function validateNewHireInput(body: unknown): ValidationResult<NewHireDTO> {
   if (!body || typeof body !== "object") {

@@ -15,6 +15,7 @@ const suites = [
   { name: "Frontend Page 6: Payroll & Payslips", script: "verify-frontend-page6.mjs" },
   { name: "Frontend Page 7: Admin Overview Dashboard", script: "verify-frontend-page7.mjs" },
   { name: "Frontend Page 8: Expenses & Reimbursements", script: "verify-frontend-page8.mjs" },
+  { name: "Frontend Page 9: Performance Management & Reviews", script: "verify-frontend-page9.mjs" },
 ];
 
 console.log("================================================================================");

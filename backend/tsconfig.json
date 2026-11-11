@@ -12,7 +12,12 @@
     "strict": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@supabase/supabase-js": ["../frontend/node_modules/@supabase/supabase-js"]
+    },
+    "typeRoots": ["../frontend/node_modules/@types"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "scripts"]

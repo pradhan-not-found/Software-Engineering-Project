@@ -1,7 +1,7 @@
 // frontend/scripts/verify-frontend-page8.mjs
 // Verifies frontend integration for Page 8 (Expenses & Reimbursements)
 
-import { readFileSync } from "fs";
+import { readFileSync, existsSync } from "fs";
 import { resolve } from "path";
 
 console.log("==================================================================");
@@ -21,9 +21,16 @@ function assert(condition, message) {
   }
 }
 
-const adminExpensesPage = readFileSync(resolve("src/app/admin/expenses/page.tsx"), "utf-8");
-const employeeExpensesPage = readFileSync(resolve("src/app/employee/expenses/page.tsx"), "utf-8");
-const storeCode = readFileSync(resolve("src/lib/store.tsx"), "utf-8");
+const resolvePath = (p) => {
+  if (existsSync(resolve(p))) return resolve(p);
+  if (existsSync(resolve("frontend", p))) return resolve("frontend", p);
+  if (existsSync(resolve("..", p))) return resolve("..", p);
+  return resolve(p);
+};
+
+const adminExpensesPage = readFileSync(resolvePath("src/app/admin/expenses/page.tsx"), "utf-8");
+const employeeExpensesPage = readFileSync(resolvePath("src/app/employee/expenses/page.tsx"), "utf-8");
+const storeCode = readFileSync(resolvePath("src/lib/store.tsx"), "utf-8");
 
 console.log("\n[1. Admin Expenses Review Page Wireup]");
 assert(adminExpensesPage.includes("decideExpense"), "Admin page connects to decideExpense store action");
@@ -47,9 +54,9 @@ assert(storeCode.includes("/api/expenses"), "Store dispatches claims to /api/exp
 assert(storeCode.includes("/api/expenses/${id}/decide") || storeCode.includes("/api/expenses/"), "Store dispatches decisions to /api/expenses/[id]/decide");
 
 console.log("\n[4. Layer 4: REST API Route Handlers]");
-const expenseRoute = readFileSync(resolve("src/app/api/expenses/route.ts"), "utf-8");
-const decideRoute = readFileSync(resolve("src/app/api/expenses/[id]/decide/route.ts"), "utf-8");
-const singleRoute = readFileSync(resolve("src/app/api/expenses/[id]/route.ts"), "utf-8");
+const expenseRoute = readFileSync(resolvePath("src/app/api/expenses/route.ts"), "utf-8");
+const decideRoute = readFileSync(resolvePath("src/app/api/expenses/[id]/decide/route.ts"), "utf-8");
+const singleRoute = readFileSync(resolvePath("src/app/api/expenses/[id]/route.ts"), "utf-8");
 
 assert(expenseRoute.includes("GET") && expenseRoute.includes("POST"), "GET and POST /api/expenses defined");
 assert(decideRoute.includes("POST"), "POST /api/expenses/[id]/decide defined");

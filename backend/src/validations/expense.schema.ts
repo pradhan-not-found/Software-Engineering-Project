@@ -1,8 +1,7 @@
 // backend/src/validations/expense.schema.ts
 // Validation schemas for Expense Claims & Reimbursements
 
-export type ExpenseCategory = "Travel" | "Meals" | "Equipment" | "Internet" | "Training" | "Other";
-export type ExpenseStatus = "PENDING" | "APPROVED" | "REJECTED" | "REIMBURSED";
+import type { ExpenseCategory, ExpenseStatus } from "../types";
 
 export const EXPENSE_CATEGORIES: ExpenseCategory[] = [
   "Travel",

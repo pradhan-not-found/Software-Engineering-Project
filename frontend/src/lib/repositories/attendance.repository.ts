@@ -112,3 +112,6 @@ export class AttendanceRepository {
   }
 }
 
+export const attendanceRepository = new AttendanceRepository();
+
+

@@ -1328,16 +1328,41 @@ function useStoreValue() {
 
     /* --------------------------- Performance -------------------------- */
     const saveGoal = (goal: Omit<Goal, "id"> & { id?: string }) =>
-      mutate((db) => {
+      mutate((db, actor) => {
         if (goal.id) {
           const g = db.goals.find((x) => x.id === goal.id);
           if (g) Object.assign(g, goal);
-        } else db.goals.push({ ...goal, id: uid("g") });
+          fetch(`/api/performance/goals/${goal.id}`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              ...(actor?.id ? { "x-session-id": actor.id } : {}),
+            },
+            body: JSON.stringify(goal),
+          }).catch((err) => console.error("API update goal error:", err));
+        } else {
+          const id = uid("g");
+          db.goals.push({ ...goal, id });
+          fetch("/api/performance/goals", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              ...(actor?.id ? { "x-session-id": actor.id } : {}),
+            },
+            body: JSON.stringify({ ...goal, id }),
+          }).catch((err) => console.error("API create goal error:", err));
+        }
       });
 
     const deleteGoal = (id: string) =>
-      mutate((db) => {
+      mutate((db, actor) => {
         db.goals = db.goals.filter((g) => g.id !== id);
+        fetch(`/api/performance/goals/${id}`, {
+          method: "DELETE",
+          headers: {
+            ...(actor?.id ? { "x-session-id": actor.id } : {}),
+          },
+        }).catch((err) => console.error("API delete goal error:", err));
       });
 
     const createCycle = (name: string, startDate: string, endDate: string): Result =>
@@ -1355,6 +1380,16 @@ function useStoreValue() {
         );
         pushNotification(db, eligible.map((e) => e.id), "Review cycle started", `${name} is open — submit your self-assessment.`, "HR", "/employee/performance");
         pushActivity(db, actor?.id ?? null, "CREATE", "ReviewCycle", `${fullName(actor)} launched “${name}” for ${eligible.length} employees.`, "HR");
+
+        fetch("/api/performance/cycles", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(actor?.id ? { "x-session-id": actor.id } : {}),
+          },
+          body: JSON.stringify({ name: name.trim(), startDate, endDate }),
+        }).catch((err) => console.error("API create cycle error:", err));
+
         return { ok: true };
       });
 
@@ -1364,6 +1399,14 @@ function useStoreValue() {
         if (!c) return;
         c.status = "CLOSED";
         pushActivity(db, actor?.id ?? null, "UPDATE", "ReviewCycle", `${fullName(actor)} closed “${c.name}”.`, "HR");
+
+        fetch(`/api/performance/cycles/${id}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            ...(actor?.id ? { "x-session-id": actor.id } : {}),
+          },
+        }).catch((err) => console.error("API close cycle error:", err));
       });
 
     const submitSelfReview = (reviewId: string, rating: number, comment: string) =>
@@ -1374,6 +1417,15 @@ function useStoreValue() {
         r.selfComment = comment;
         if (r.status === "PENDING_SELF") r.status = "PENDING_MANAGER";
         pushNotification(db, [r.reviewerId], "Self-review submitted", `${fullName(actor)} submitted their self-assessment. Your review is due.`, "HR", "/employee/team");
+
+        fetch(`/api/performance/reviews/${reviewId}/self`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(actor?.id ? { "x-session-id": actor.id } : {}),
+          },
+          body: JSON.stringify({ rating, comment }),
+        }).catch((err) => console.error("API submit self review error:", err));
       });
 
     const submitManagerReview = (reviewId: string, rating: number, comment: string) =>
@@ -1386,6 +1438,15 @@ function useStoreValue() {
         r.status = "COMPLETED";
         pushNotification(db, [r.employeeId], "Review completed", `${fullName(actor)} completed your performance review.`, "HR", "/employee/performance");
         pushActivity(db, actor?.id ?? null, "UPDATE", "Review", `${fullName(actor)} completed ${fullName(emp(db, r.employeeId))}'s review.`, "HR");
+
+        fetch(`/api/performance/reviews/${reviewId}/manager`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(actor?.id ? { "x-session-id": actor.id } : {}),
+          },
+          body: JSON.stringify({ rating, comment }),
+        }).catch((err) => console.error("API submit manager review error:", err));
       });
 
     const addPeerFeedback = (reviewId: string, rating: number, comment: string) =>
@@ -1395,6 +1456,15 @@ function useStoreValue() {
         r.peerFeedback = r.peerFeedback.filter((p) => p.fromId !== actor.id);
         r.peerFeedback.push({ fromId: actor.id, rating, comment });
         pushNotification(db, [r.employeeId], "Peer feedback received", `You received new peer feedback.`, "HR", "/employee/performance");
+
+        fetch(`/api/performance/reviews/${reviewId}/peer`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(actor?.id ? { "x-session-id": actor.id } : {}),
+          },
+          body: JSON.stringify({ rating, comment }),
+        }).catch((err) => console.error("API add peer feedback error:", err));
       });
 
     /* -------------------------- Notifications ------------------------- */
