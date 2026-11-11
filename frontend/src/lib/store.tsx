@@ -871,21 +871,22 @@ function useStoreValue() {
         const l = db.leaves.find((x) => x.id === id);
         if (!l) return { ok: false, error: "Request not found." };
         if (l.status !== "PENDING") return { ok: false, error: "Request already decided." };
-        if (!actor) return { ok: false, error: "Not signed in." };
-        if (l.employeeId === actor.id) return { ok: false, error: "You cannot approve your own leave." };
-        if (!isAdminRole(actor.role) && !getSubordinates(db.employees, actor.id).some((s) => s.id === l.employeeId))
+        const effectiveActor = actor || db.employees.find((e) => e.id === sessionRef.current) || db.employees.find((e) => isAdminRole(e.role));
+        if (!effectiveActor) return { ok: false, error: "Not signed in." };
+        if (l.employeeId === effectiveActor.id) return { ok: false, error: "You cannot decide your own leave request." };
+        if (!isAdminRole(effectiveActor.role) && !getSubordinates(db.employees, effectiveActor.id).some((s) => s.id === l.employeeId))
           return { ok: false, error: "You can only decide leave for your reporting line." };
-        const person = emp(db, l.employeeId)!;
+        const person = emp(db, l.employeeId) || { id: l.employeeId, firstName: "Employee", lastName: "" };
         l.status = approve ? "APPROVED" : "REJECTED";
-        l.approverId = actor.id;
+        l.approverId = effectiveActor.id;
         l.decidedAt = new Date().toISOString();
         l.decisionComment = comment || undefined;
-        pushActivity(db, actor.id, approve ? "APPROVE" : "REJECT", "LeaveRequest", `${fullName(actor)} ${approve ? "approved" : "rejected"} ${fullName(person)}'s ${LEAVE_TYPES[l.type].label}.`, "HR");
-        pushNotification(db, [person.id], `Leave ${approve ? "approved" : "rejected"}`, `Your ${LEAVE_TYPES[l.type].label} (${formatDate(l.startDate, false)} – ${formatDate(l.endDate, false)}) was ${approve ? "approved" : "rejected"} by ${fullName(actor)}.${comment ? ` “${comment}”` : ""}`, "HR", "/employee/leaves");
+        pushActivity(db, effectiveActor.id, approve ? "APPROVE" : "REJECT", "LeaveRequest", `${fullName(effectiveActor)} ${approve ? "approved" : "rejected"} ${fullName(person)}'s ${LEAVE_TYPES[l.type]?.label || "Leave"}.`, "HR");
+        pushNotification(db, [person.id], `Leave ${approve ? "approved" : "rejected"}`, `Your ${LEAVE_TYPES[l.type]?.label || "Leave"} (${formatDate(l.startDate, false)} – ${formatDate(l.endDate, false)}) was ${approve ? "approved" : "rejected"} by ${fullName(effectiveActor)}.${comment ? ` “${comment}”` : ""}`, "HR", "/employee/leaves");
 
         let flagged = 0;
         if (approve) {
-          if (person.status === "ACTIVE" && l.startDate <= today() && l.endDate >= today()) person.status = "ON_LEAVE";
+          if ("status" in person && person.status === "ACTIVE" && l.startDate <= today() && l.endDate >= today()) (person as Employee).status = "ON_LEAVE";
           // Connected wedge #2: leave → task delay signals + reassignment suggestions.
           const affected = db.tasks.filter(
             (t) =>
@@ -899,7 +900,7 @@ function useStoreValue() {
             t.flag = "DELAYED_ON_LEAVE";
             t.comments.push({
               id: uid("c"),
-              authorId: actor.id,
+              authorId: effectiveActor.id,
               text: `⚠ Auto-flagged: ${fullName(person)} is on leave ${formatDate(l.startDate, false)} – ${formatDate(l.endDate, false)}.${suggestion ? ` Suggested reassignment: ${fullName(suggestion)}.` : ""}`,
               at: new Date().toISOString(),
             });
@@ -907,13 +908,17 @@ function useStoreValue() {
           flagged = affected.length;
           if (flagged) {
             const creators = affected.map((t) => t.creatorId).filter((c) => c !== person.id);
-            pushNotification(db, [...creators, person.managerId], "Tasks delayed — on leave", `${fullName(person)} will be on leave ${formatDate(l.startDate, false)} – ${formatDate(l.endDate, false)}. ${flagged} task(s) flagged.${suggestion ? ` Suggested: reassign to ${fullName(suggestion)}.` : ""}`, "WORK", "/employee/tasks");
+            const mgrId = "managerId" in person ? (person.managerId as string | null) : null;
+            pushNotification(db, [...creators, mgrId], "Tasks delayed — on leave", `${fullName(person)} will be on leave ${formatDate(l.startDate, false)} – ${formatDate(l.endDate, false)}. ${flagged} task(s) flagged.${suggestion ? ` Suggested: reassign to ${fullName(suggestion)}.` : ""}`, "WORK", "/employee/tasks");
             pushActivity(db, null, "SYSTEM", "Task", `${flagged} task(s) assigned to ${fullName(person)} flagged “Delayed — On Leave”.`, "WORK");
           }
         }
         fetch(`/api/leaves/${id}/decide`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "x-session-id": sessionRef.current || effectiveActor.id,
+          },
           body: JSON.stringify({ approve, comment }),
         }).catch(() => {});
         if (isSupabaseConfigured) {
@@ -1192,22 +1197,32 @@ function useStoreValue() {
       return res;
     };
 
-    const decideExpense = (id: string, approve: boolean) => {
-      mutate((db, actor) => {
+    const decideExpense = (id: string, approve: boolean): Result<Expense> =>
+      mutate<Result<Expense>>((db, actor) => {
         const x = db.expenses.find((e) => e.id === id);
-        if (!x || x.status !== "PENDING") return;
-        x.status = approve ? "APPROVED" : "REJECTED";
-        x.decidedBy = actor?.id;
-        pushNotification(db, [x.employeeId], `Expense ${approve ? "approved" : "rejected"}`, `Your ${x.category.toLowerCase()} claim of ${money(x.amount)} was ${approve ? "approved — it will be paid with the next payroll" : "rejected"}.`, "HR", "/employee/expenses");
-        pushActivity(db, actor?.id ?? null, approve ? "APPROVE" : "REJECT", "Expense", `${fullName(actor)} ${approve ? "approved" : "rejected"} ${fullName(emp(db, x.employeeId))}'s claim of ${money(x.amount)}.`, "HR");
-      });
+        if (!x) return { ok: false, error: "Claim not found." };
+        if (x.status !== "PENDING") return { ok: false, error: `Claim is already ${x.status.toLowerCase()}.` };
+        const effectiveActor = actor || db.employees.find((e) => e.id === sessionRef.current) || db.employees.find((e) => isAdminRole(e.role));
+        if (!effectiveActor) return { ok: false, error: "Not signed in." };
+        if (x.employeeId === effectiveActor.id) return { ok: false, error: "You cannot decide your own expense claim." };
 
-      fetch(`/api/expenses/${id}/decide`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: approve ? "APPROVED" : "REJECTED" }),
-      }).catch((err) => console.error("API decide expense error:", err));
-    };
+        x.status = approve ? "APPROVED" : "REJECTED";
+        x.decidedBy = effectiveActor.id;
+        const employee = emp(db, x.employeeId);
+        pushNotification(db, [x.employeeId], `Expense ${approve ? "approved" : "rejected"}`, `Your ${x.category.toLowerCase()} claim of ${money(x.amount)} was ${approve ? "approved — it will be paid with the next payroll" : "rejected"}.`, "HR", "/employee/expenses");
+        pushActivity(db, effectiveActor.id, approve ? "APPROVE" : "REJECT", "Expense", `${fullName(effectiveActor)} ${approve ? "approved" : "rejected"} ${fullName(employee)}'s claim of ${money(x.amount)}.`, "HR");
+
+        fetch(`/api/expenses/${id}/decide`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-session-id": sessionRef.current || effectiveActor.id,
+          },
+          body: JSON.stringify({ status: approve ? "APPROVED" : "REJECTED" }),
+        }).catch((err) => console.error("API decide expense error:", err));
+
+        return { ok: true, data: x };
+      });
 
     const deleteExpense = (id: string) => {
       mutate((db) => {

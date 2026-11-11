@@ -1,5 +1,5 @@
 import { isSupabaseConfigured, supabase } from "./supabase";
-import type { DB, Employee, Task, LeaveRequest } from "./types";
+import type { DB, Employee, Task, LeaveRequest } from "../types";
 
 /**
  * Loads the application state from Supabase if configured.

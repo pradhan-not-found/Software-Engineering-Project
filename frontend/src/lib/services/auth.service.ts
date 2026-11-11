@@ -76,12 +76,18 @@ export class AuthService {
   async getSessionUser(token: string): Promise<Employee | null> {
     try {
       if (!token) return null;
-      const decodedStr = Buffer.from(token, "base64").toString("utf-8");
-      const session = JSON.parse(decodedStr) as AuthSession;
+      let userId: string | null = null;
+      try {
+        const decodedStr = Buffer.from(token, "base64").toString("utf-8");
+        const session = JSON.parse(decodedStr) as AuthSession;
+        userId = session.userId;
+      } catch {
+        userId = token;
+      }
 
-      if (!session.userId) return null;
+      if (!userId) return null;
 
-      const user = await userRepository.findById(session.userId);
+      const user = await userRepository.findById(userId);
       if (!user) return null;
 
       if (user.accountStatus === "SUSPENDED" || user.status === "TERMINATED") {

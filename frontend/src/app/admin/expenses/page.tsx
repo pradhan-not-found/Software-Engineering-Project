@@ -13,7 +13,7 @@ const CATEGORIES: Expense["category"][] = ["Travel", "Meals", "Equipment", "Inte
 const CAT_COLOR: Record<Expense["category"], string> = { Travel: "blue", Meals: "orange", Equipment: "purple", Internet: "teal", Training: "green", Other: "gray" };
 
 export default function AdminExpensesPage() {
-  const { db, decideExpense } = useAuthed();
+  const { db, user, decideExpense } = useAuthed();
   const toast = useToast();
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("ALL");
@@ -39,7 +39,11 @@ export default function AdminExpensesPage() {
   );
 
   const decide = (x: Expense, ok: boolean) => {
-    decideExpense(x.id, ok);
+    const res = decideExpense(x.id, ok);
+    if (!res.ok) {
+      toast(res.error, "error");
+      return;
+    }
     toast(ok ? `Approved ${money(x.amount)} — it will be paid in the next payroll run.` : "Claim rejected.", ok ? "success" : "info");
   };
 
@@ -66,6 +70,7 @@ export default function AdminExpensesPage() {
           <div className="flex flex-col divide-y divide-gray-100 dark:divide-white/5">
             {pending.map((x) => {
               const e = db.employees.find((y) => y.id === x.employeeId);
+              const isSelf = x.employeeId === user?.id;
               return (
                 <div key={x.id} className="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-4">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -74,6 +79,7 @@ export default function AdminExpensesPage() {
                       <p className="text-sm font-medium truncate">{x.description}</p>
                       <p className="text-xs text-gray-500 dark:text-white/50">
                         {fullName(e)} · {formatDate(x.date)} · submitted {timeAgo(x.createdAt)}
+                        {isSelf && <span className="text-gray-400 dark:text-white/40 ml-1.5 font-medium">(Your claim)</span>}
                       </p>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge color={CAT_COLOR[x.category]}>{x.category}</Badge>
@@ -87,8 +93,26 @@ export default function AdminExpensesPage() {
                   </div>
                   <span className="text-lg font-semibold tabular-nums">{money(x.amount)}</span>
                   <div className="flex gap-2">
-                    <Button variant="secondary" size="sm" icon={<X className="w-3.5 h-3.5" />} onClick={() => decide(x, false)}>Reject</Button>
-                    <Button variant="success" size="sm" icon={<Check className="w-3.5 h-3.5" />} onClick={() => decide(x, true)}>Approve</Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      icon={<X className="w-3.5 h-3.5" />}
+                      disabled={isSelf}
+                      title={isSelf ? "You cannot decide your own expense claim" : undefined}
+                      onClick={() => decide(x, false)}
+                    >
+                      Reject
+                    </Button>
+                    <Button
+                      variant="success"
+                      size="sm"
+                      icon={<Check className="w-3.5 h-3.5" />}
+                      disabled={isSelf}
+                      title={isSelf ? "You cannot decide your own expense claim" : undefined}
+                      onClick={() => decide(x, true)}
+                    >
+                      Approve
+                    </Button>
                   </div>
                 </div>
               );

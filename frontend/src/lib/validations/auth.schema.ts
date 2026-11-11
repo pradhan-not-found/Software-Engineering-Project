@@ -71,8 +71,8 @@ export function validateSignupInput(body: unknown): ValidationResult<SignupDTO> 
   }
 
   const loginCheck = validateLoginInput({ email, password });
-  if (!loginCheck.ok) {
-    return loginCheck;
+  if (loginCheck.ok === false) {
+    return { ok: false, error: loginCheck.error };
   }
 
   const org = typeof orgName === "string" ? orgName.trim() : "My Organization";

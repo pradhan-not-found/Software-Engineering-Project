@@ -308,3 +308,55 @@ CREATE POLICY "Allow all for anon" ON notifications FOR ALL USING (true) WITH CH
 DROP POLICY IF EXISTS "Allow all for anon" ON activity_log;
 CREATE POLICY "Allow all for anon" ON activity_log FOR ALL USING (true) WITH CHECK (true);
 
+-- 15. Review Cycles Table
+CREATE TABLE IF NOT EXISTS review_cycles (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  start_date DATE NOT NULL,
+  end_date DATE NOT NULL,
+  status TEXT NOT NULL DEFAULT 'DRAFT', -- 'DRAFT', 'ACTIVE', 'CLOSED'
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 16. Performance Reviews Table
+CREATE TABLE IF NOT EXISTS reviews (
+  id TEXT PRIMARY KEY,
+  cycle_id TEXT NOT NULL REFERENCES review_cycles(id) ON DELETE CASCADE,
+  employee_id TEXT NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+  reviewer_id TEXT REFERENCES employees(id) ON DELETE SET NULL,
+  self_rating NUMERIC(3, 1),
+  self_comment TEXT,
+  peer_feedback JSONB DEFAULT '[]'::jsonb,
+  manager_rating NUMERIC(3, 1),
+  manager_comment TEXT,
+  status TEXT NOT NULL DEFAULT 'PENDING_SELF', -- 'PENDING_SELF', 'PENDING_MANAGER', 'COMPLETED'
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 17. Goals (OKRs / KPIs) Table
+CREATE TABLE IF NOT EXISTS goals (
+  id TEXT PRIMARY KEY,
+  employee_id TEXT NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  type TEXT NOT NULL DEFAULT 'OKR', -- 'OKR', 'KPI'
+  quarter TEXT NOT NULL,
+  progress INTEGER NOT NULL DEFAULT 0,
+  status TEXT NOT NULL DEFAULT 'ON_TRACK', -- 'ON_TRACK', 'AT_RISK', 'BEHIND', 'COMPLETED'
+  key_results JSONB DEFAULT '[]'::jsonb,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE review_cycles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
+ALTER TABLE goals ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow all for anon" ON review_cycles;
+CREATE POLICY "Allow all for anon" ON review_cycles FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow all for anon" ON reviews;
+CREATE POLICY "Allow all for anon" ON reviews FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow all for anon" ON goals;
+CREATE POLICY "Allow all for anon" ON goals FOR ALL USING (true) WITH CHECK (true);
+
+

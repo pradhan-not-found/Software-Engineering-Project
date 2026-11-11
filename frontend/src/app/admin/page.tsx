@@ -82,43 +82,98 @@ export default function AdminDashboardPage() {
               const e = db.employees.find((x) => x.id === l.employeeId);
               const due = openTasksFor(db, l.employeeId).filter((x) => x.dueDate && x.dueDate >= l.startDate && x.dueDate <= l.endDate);
               const peer = suggestPeers(db, l.employeeId, l.startDate, l.endDate)[0];
+              const isSelf = l.employeeId === user?.id;
               return (
                 <div key={l.id} className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/5">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <Avatar employee={e} size="sm" />
                     <div className="min-w-0">
-                      <p className="text-sm"><span className="font-medium">{fullName(e)}</span> · {LEAVE_TYPES[l.type].label}, {l.days}d</p>
+                      <p className="text-sm"><span className="font-medium">{fullName(e)}</span> · {LEAVE_TYPES[l.type]?.label || "Leave"}, {l.days}d</p>
                       <p className="text-xs text-gray-500 dark:text-white/50">
                         {formatDate(l.startDate, false)} – {formatDate(l.endDate, false)} ·{" "}
                         <span className={due.length ? "text-amber-600 dark:text-amber-400 font-medium" : ""}>{due.length} task{due.length === 1 ? "" : "s"} due in window</span>
                         {due.length > 0 && peer && <> · cover: {peer.employee.firstName}</>}
+                        {isSelf && <span className="text-gray-400 dark:text-white/40 ml-1.5 font-medium">(Your request)</span>}
                       </p>
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button size="sm" variant="secondary" icon={<X className="w-3.5 h-3.5" />} onClick={() => { const r = decideLeave(l.id, false); toast(r.ok ? "Leave rejected." : r.error, r.ok ? "info" : "error"); }}>Reject</Button>
-                    <Button size="sm" variant="success" icon={<Check className="w-3.5 h-3.5" />} onClick={() => {
-                      const r = decideLeave(l.id, true);
-                      toast(r.ok ? `Leave approved${r.data ? ` — ${r.data} task(s) flagged “Delayed — On Leave”` : ""}.` : r.error, r.ok ? "success" : "error");
-                    }}>Approve</Button>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      icon={<X className="w-3.5 h-3.5" />}
+                      disabled={isSelf}
+                      title={isSelf ? "You cannot decide your own leave request" : undefined}
+                      onClick={() => {
+                        const r = decideLeave(l.id, false);
+                        toast(r.ok ? "Leave rejected." : r.error, r.ok ? "info" : "error");
+                      }}
+                    >
+                      Reject
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="success"
+                      icon={<Check className="w-3.5 h-3.5" />}
+                      disabled={isSelf}
+                      title={isSelf ? "You cannot decide your own leave request" : undefined}
+                      onClick={() => {
+                        const r = decideLeave(l.id, true);
+                        toast(
+                          r.ok ? `Leave approved${r.data ? ` — ${r.data} task(s) flagged “Delayed — On Leave”` : ""}.` : r.error,
+                          r.ok ? "success" : "error"
+                        );
+                      }}
+                    >
+                      Approve
+                    </Button>
                   </div>
                 </div>
               );
             })}
             {pendingExpenses.slice(0, 3).map((x) => {
               const e = db.employees.find((y) => y.id === x.employeeId);
+              const isSelf = x.employeeId === user?.id;
               return (
                 <div key={x.id} className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/5">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div className="w-8 h-8 rounded-full bg-teal-100 dark:bg-teal-500/15 text-teal-600 dark:text-teal-400 flex items-center justify-center"><Receipt className="w-4 h-4" /></div>
                     <div className="min-w-0">
                       <p className="text-sm"><span className="font-medium">{fullName(e)}</span> · {x.category} claim {money(x.amount)}</p>
-                      <p className="text-xs text-gray-500 dark:text-white/50 truncate">{x.description}</p>
+                      <p className="text-xs text-gray-500 dark:text-white/50 truncate">
+                        {x.description}
+                        {isSelf && <span className="text-gray-400 dark:text-white/40 ml-1.5 font-medium">(Your claim)</span>}
+                      </p>
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button size="sm" variant="secondary" onClick={() => { decideExpense(x.id, false); toast("Claim rejected.", "info"); }}>Reject</Button>
-                    <Button size="sm" variant="success" onClick={() => { decideExpense(x.id, true); toast("Claim approved — will be paid with next payroll."); }}>Approve</Button>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      disabled={isSelf}
+                      title={isSelf ? "You cannot decide your own expense claim" : undefined}
+                      onClick={() => {
+                        const r = decideExpense(x.id, false);
+                        toast(r.ok ? "Claim rejected." : r.error, r.ok ? "info" : "error");
+                      }}
+                    >
+                      Reject
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="success"
+                      disabled={isSelf}
+                      title={isSelf ? "You cannot decide your own expense claim" : undefined}
+                      onClick={() => {
+                        const r = decideExpense(x.id, true);
+                        toast(
+                          r.ok ? "Claim approved — will be paid with next payroll." : r.error,
+                          r.ok ? "success" : "error"
+                        );
+                      }}
+                    >
+                      Approve
+                    </Button>
                   </div>
                 </div>
               );

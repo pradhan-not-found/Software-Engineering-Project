@@ -1,7 +1,7 @@
 // frontend/scripts/verify-frontend-page7.mjs
 // Verifies frontend integration for Page 7 (Admin Overview Dashboard & Connected Signals)
 
-import { readFileSync } from "fs";
+import { readFileSync, existsSync } from "fs";
 import { resolve } from "path";
 
 console.log("==================================================================");
@@ -21,9 +21,16 @@ function assert(condition, message) {
   }
 }
 
-const adminDashboardPage = readFileSync(resolve("src/app/admin/page.tsx"), "utf-8");
-const employeeDashboardPage = readFileSync(resolve("src/app/employee/page.tsx"), "utf-8");
-const storeCode = readFileSync(resolve("src/lib/store.tsx"), "utf-8");
+const resolvePath = (p) => {
+  if (existsSync(resolve(p))) return resolve(p);
+  if (existsSync(resolve("frontend", p))) return resolve("frontend", p);
+  if (existsSync(resolve("..", p))) return resolve("..", p);
+  return resolve(p);
+};
+
+const adminDashboardPage = readFileSync(resolvePath("src/app/admin/page.tsx"), "utf-8");
+const employeeDashboardPage = readFileSync(resolvePath("src/app/employee/page.tsx"), "utf-8");
+const storeCode = readFileSync(resolvePath("src/lib/store.tsx"), "utf-8");
 
 console.log("\n[1. Admin Overview Dashboard UI Wireup]");
 assert(adminDashboardPage.includes("Total Headcount"), "Admin page displays Total Headcount stat card");
@@ -49,7 +56,7 @@ assert(storeCode.includes("fetchDashboardOverview"), "Store exposes fetchDashboa
 assert(storeCode.includes("/api/dashboard/overview"), "Store connects with /api/dashboard/overview REST route");
 
 console.log("\n[4. Layer 4: REST API Route Handler Wireup]");
-const overviewRouteCode = readFileSync(resolve("src/app/api/dashboard/overview/route.ts"), "utf-8");
+const overviewRouteCode = readFileSync(resolvePath("src/app/api/dashboard/overview/route.ts"), "utf-8");
 assert(overviewRouteCode.includes("GET"), "GET /api/dashboard/overview route handler defined");
 assert(overviewRouteCode.includes("authService.getSessionUser"), "Route handler enforces session authentication");
 assert(overviewRouteCode.includes("validateDashboardFilterInput"), "Route handler enforces input validation schema");

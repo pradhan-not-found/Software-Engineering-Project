@@ -19,8 +19,8 @@ import type {
   Timesheet,
   Role,
   ModuleKey,
-} from "./types";
-import { addDays, computePayrollLine, isWeekend, startOfWeek, today, toISODate, workingDays } from "./utils";
+} from "../types";
+import { addDays, computePayrollLine, isWeekend, startOfWeek, today, toISODate, workingDays } from "../utils";
 
 export const DB_VERSION = 3;
 

@@ -40,6 +40,12 @@ function mapRowToLeave(row: DBLeaveRow): LeaveRequest {
 }
 
 export class LeaveRepository {
+  private fallbackLeaves: LeaveRequest[];
+
+  constructor() {
+    this.fallbackLeaves = createSeed().leaves;
+  }
+
   /**
    * List leave requests with optional filters
    */
@@ -66,8 +72,7 @@ export class LeaveRepository {
     }
 
     // Fallback to local in-memory seed
-    const seed = createSeed();
-    let list = seed.leaves;
+    let list = [...this.fallbackLeaves];
     if (filters?.employeeId) {
       list = list.filter((l) => l.employeeId === filters.employeeId);
     }
@@ -90,8 +95,7 @@ export class LeaveRepository {
       }
     }
 
-    const seed = createSeed();
-    return seed.leaves.find((l) => l.id === id) || null;
+    return this.fallbackLeaves.find((l) => l.id === id) || null;
   }
 
   /**
@@ -120,6 +124,7 @@ export class LeaveRepository {
         console.error("Supabase create leave error:", err);
       }
     }
+    this.fallbackLeaves.unshift(leave);
     return leave;
   }
 
@@ -150,14 +155,15 @@ export class LeaveRepository {
       }
     }
 
-    const leave = await this.findById(id);
+    const leave = this.fallbackLeaves.find((l) => l.id === id);
     if (leave) {
       leave.status = status;
       leave.approverId = approverId;
       leave.decisionComment = comment;
       leave.decidedAt = decidedAt;
+      return leave;
     }
-    return leave;
+    return null;
   }
 
   /**
@@ -172,7 +178,12 @@ export class LeaveRepository {
         console.error("Supabase cancel leave error:", err);
       }
     }
-    return true;
+    const leave = this.fallbackLeaves.find((l) => l.id === id);
+    if (leave) {
+      leave.status = "CANCELLED";
+      return true;
+    }
+    return false;
   }
 
   /**
