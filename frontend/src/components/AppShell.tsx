@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, Menu, Search, X } from "lucide-react";
+import { Bell, Database, Menu, Search, X } from "lucide-react";
 import ProfileDropdown from "@/components/ProfileDropdown";
 import TechText from "@/components/TechText";
 import { Avatar, FullPageLoader } from "@/components/ui";
@@ -147,16 +147,16 @@ export default function AppShell({
           <div className="flex items-center gap-2 sm:gap-4">
             {isSupabaseConfigured ? (
               <span className="hidden sm:inline-flex items-center gap-2.5 px-3.5 py-1.5 h-[34px] rounded-full bg-blue-500/[0.08] dark:bg-blue-950/40 border border-blue-500/30 dark:border-blue-400/30 shadow-[0_0_14px_rgba(37,99,235,0.2)] backdrop-blur-sm transition-all hover:border-blue-400/60 hover:shadow-[0_0_20px_rgba(37,99,235,0.35)] cursor-pointer select-none">
-                <span className="relative flex h-2.5 w-2.5 items-center justify-center flex-shrink-0">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600 dark:bg-blue-500 shadow-[0_0_8px_#2563eb]" />
+                <span className="relative flex items-center justify-center flex-shrink-0">
+                  <span className="absolute -inset-1 rounded-full bg-blue-500/25 blur-[5px] animate-pulse" />
+                  <Database className="relative w-3.5 h-3.5 text-blue-500 dark:text-blue-400 drop-shadow-[0_0_8px_rgba(59,130,246,0.85)]" />
                 </span>
-                <div style={{ width: "122px", height: "24px", position: "relative" }}>
+                <div style={{ width: "144px", height: "24px", position: "relative" }}>
                   <TechText
-                    text="Supabase Live"
+                    text="Supabase   Live"
                     fontWeight={600}
                     fontSize={14}
-                    letterSpacing={-0.01}
+                    letterSpacing={0.06}
                     reveal="letter"
                     dashLength={2.5}
                     dashGap={1.2}
@@ -178,15 +178,16 @@ export default function AppShell({
                 className="hidden sm:inline-flex items-center gap-2.5 px-3.5 py-1.5 h-[34px] rounded-full bg-blue-500/[0.08] dark:bg-blue-950/40 border border-blue-500/30 dark:border-blue-400/30 shadow-[0_0_14px_rgba(37,99,235,0.2)] backdrop-blur-sm transition-all hover:border-blue-400/60 hover:shadow-[0_0_20px_rgba(37,99,235,0.35)] cursor-pointer select-none"
                 title="Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to .env.local to go live"
               >
-                <span className="relative flex h-2.5 w-2.5 items-center justify-center flex-shrink-0">
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600 dark:bg-blue-500 shadow-[0_0_8px_#2563eb]" />
+                <span className="relative flex items-center justify-center flex-shrink-0">
+                  <span className="absolute -inset-1 rounded-full bg-blue-500/25 blur-[5px] animate-pulse" />
+                  <Database className="relative w-3.5 h-3.5 text-blue-500 dark:text-blue-400 drop-shadow-[0_0_8px_rgba(59,130,246,0.85)]" />
                 </span>
-                <div style={{ width: "138px", height: "24px", position: "relative" }}>
+                <div style={{ width: "165px", height: "24px", position: "relative" }}>
                   <TechText
-                    text="Local Demo Mode"
+                    text="Local   Demo   Mode"
                     fontWeight={600}
                     fontSize={14}
-                    letterSpacing={-0.01}
+                    letterSpacing={0.06}
                     reveal="letter"
                     dashLength={2.5}
                     dashGap={1.2}
