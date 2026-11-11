@@ -215,7 +215,14 @@ export const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttribute
 
 export function Select({ className, children, ...props }: React.SelectHTMLAttributes<HTMLSelectElement>) {
   return (
-    <select className={cn(FIELD, "pr-8 dark:[color-scheme:dark]", className)} {...props}>
+    <select
+      className={cn(
+        FIELD,
+        "pr-8 [color-scheme:light] dark:[color-scheme:dark] [&>option]:bg-white [&>option]:text-gray-900 dark:[&>option]:bg-[#18181b] dark:[&>option]:text-white",
+        className,
+      )}
+      {...props}
+    >
       {children}
     </select>
   );

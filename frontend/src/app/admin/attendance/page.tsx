@@ -115,8 +115,12 @@ function Daily() {
                       }}
                       className="w-[130px] py-1.5 text-xs"
                     >
-                      <option value="" disabled>Not marked</option>
-                      {STATUSES.map((s) => <option key={s} value={s}>{s.replace("_", " ").toLowerCase()}</option>)}
+                      <option value="" disabled className="text-gray-400 dark:text-gray-500 bg-white dark:bg-[#18181b]">Not marked</option>
+                      {STATUSES.map((s) => (
+                        <option key={s} value={s} className="text-gray-900 dark:text-white bg-white dark:bg-[#18181b]">
+                          {s.replace("_", " ").toLowerCase()}
+                        </option>
+                      ))}
                     </Select>
                   </Td>
                 </tr>
@@ -223,8 +227,8 @@ function Shifts() {
                 <Td><Badge color={e.workMode === "Remote" ? "teal" : e.workMode === "Hybrid" ? "purple" : "gray"}>{e.workMode}</Badge></Td>
                 <Td>
                   <Select value={SHIFT_PRESETS.includes(e.shift) ? e.shift : ""} onChange={(ev) => { setShift(e.id, ev.target.value); toast(`${e.firstName} moved to ${ev.target.value.split(" (")[0]} shift.`); }} className="py-1.5 text-xs w-[200px]">
-                    {!SHIFT_PRESETS.includes(e.shift) && <option value="">{e.shift}</option>}
-                    {SHIFT_PRESETS.map((s) => <option key={s} value={s}>{s}</option>)}
+                    {!SHIFT_PRESETS.includes(e.shift) && <option value="" className="text-gray-900 dark:text-white bg-white dark:bg-[#18181b]">{e.shift}</option>}
+                    {SHIFT_PRESETS.map((s) => <option key={s} value={s} className="text-gray-900 dark:text-white bg-white dark:bg-[#18181b]">{s}</option>)}
                   </Select>
                 </Td>
               </tr>

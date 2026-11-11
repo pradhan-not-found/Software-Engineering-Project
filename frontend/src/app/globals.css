@@ -19,6 +19,38 @@ html.dark {
   color-scheme: dark;
 }
 
+/* Ensure native form controls and select options have high contrast across themes */
+select,
+input,
+textarea {
+  color-scheme: light dark;
+}
+
+html.dark select,
+.dark select {
+  color-scheme: dark !important;
+}
+
+select option {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+}
+
+html.dark select option,
+.dark select option {
+  background-color: #18181b !important;
+  color: #ffffff !important;
+}
+
+select option:disabled {
+  color: #9ca3af !important;
+}
+
+html.dark select option:disabled,
+.dark select option:disabled {
+  color: #71717a !important;
+}
+
 /* Thin, theme-aware scrollbars for content areas */
 * {
   scrollbar-width: thin;
