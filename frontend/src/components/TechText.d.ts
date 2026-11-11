@@ -33,3 +33,4 @@ export interface TechTextProps {
 
 declare const TechText: FC<TechTextProps>;
 export default TechText;
+

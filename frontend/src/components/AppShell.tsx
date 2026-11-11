@@ -146,52 +146,60 @@ export default function AppShell({
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
             {isSupabaseConfigured ? (
-              <span className="hidden sm:inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/[0.08] dark:bg-emerald-950/40 border border-emerald-500/30 dark:border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.15)] backdrop-blur-sm transition-all hover:border-emerald-400 hover:shadow-[0_0_16px_rgba(16,185,129,0.25)]">
-                <span className="relative flex h-2 w-2 items-center justify-center flex-shrink-0">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500 shadow-[0_0_6px_#10b981]" />
+              <span className="hidden sm:inline-flex items-center gap-2.5 px-3.5 py-1.5 h-[34px] rounded-full bg-blue-500/[0.08] dark:bg-blue-950/40 border border-blue-500/30 dark:border-blue-400/30 shadow-[0_0_14px_rgba(37,99,235,0.2)] backdrop-blur-sm transition-all hover:border-blue-400/60 hover:shadow-[0_0_20px_rgba(37,99,235,0.35)] cursor-pointer select-none">
+                <span className="relative flex h-2.5 w-2.5 items-center justify-center flex-shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600 dark:bg-blue-500 shadow-[0_0_8px_#2563eb]" />
                 </span>
-                <div style={{ width: "96px", height: "18px", position: "relative" }}>
+                <div style={{ width: "122px", height: "24px", position: "relative" }}>
                   <TechText
                     text="Supabase Live"
                     fontWeight={600}
-                    fontSize={12}
-                    letterSpacing={-0.02}
+                    fontSize={14}
+                    letterSpacing={-0.01}
                     reveal="letter"
-                    dashLength={3}
-                    dashGap={1.5}
-                    specks={6}
-                    intro="none"
-                    clickKick
+                    dashLength={2.5}
+                    dashGap={1.2}
+                    specks={3}
+                    selection={true}
+                    labels={false}
                     guides={false}
-                    color="#10b981"
-                    accentColor="#34d399"
+                    draggable={false}
+                    clickKick={true}
+                    sweep={false}
+                    intro="none"
+                    color="#3b82f6"
+                    accentColor="#60a5fa"
                   />
                 </div>
               </span>
             ) : (
               <span
-                className="hidden sm:inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/[0.08] dark:bg-amber-950/40 border border-amber-500/30 dark:border-amber-500/40 shadow-[0_0_12px_rgba(245,158,11,0.15)] backdrop-blur-sm transition-all hover:border-amber-400 hover:shadow-[0_0_16px_rgba(245,158,11,0.25)]"
+                className="hidden sm:inline-flex items-center gap-2.5 px-3.5 py-1.5 h-[34px] rounded-full bg-blue-500/[0.08] dark:bg-blue-950/40 border border-blue-500/30 dark:border-blue-400/30 shadow-[0_0_14px_rgba(37,99,235,0.2)] backdrop-blur-sm transition-all hover:border-blue-400/60 hover:shadow-[0_0_20px_rgba(37,99,235,0.35)] cursor-pointer select-none"
                 title="Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to .env.local to go live"
               >
-                <span className="relative flex h-2 w-2 items-center justify-center flex-shrink-0">
-                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-500 shadow-[0_0_6px_#f59e0b]" />
+                <span className="relative flex h-2.5 w-2.5 items-center justify-center flex-shrink-0">
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600 dark:bg-blue-500 shadow-[0_0_8px_#2563eb]" />
                 </span>
-                <div style={{ width: "110px", height: "18px", position: "relative" }}>
+                <div style={{ width: "138px", height: "24px", position: "relative" }}>
                   <TechText
                     text="Local Demo Mode"
                     fontWeight={600}
-                    fontSize={12}
-                    letterSpacing={-0.02}
+                    fontSize={14}
+                    letterSpacing={-0.01}
                     reveal="letter"
-                    dashLength={3}
-                    dashGap={1.5}
-                    specks={6}
-                    intro="none"
-                    clickKick
+                    dashLength={2.5}
+                    dashGap={1.2}
+                    specks={3}
+                    selection={true}
+                    labels={false}
                     guides={false}
-                    color="#f59e0b"
-                    accentColor="#fbbf24"
+                    draggable={false}
+                    clickKick={true}
+                    sweep={false}
+                    intro="none"
+                    color="#3b82f6"
+                    accentColor="#60a5fa"
                   />
                 </div>
               </span>

@@ -227,8 +227,8 @@ const TechText = ({
       let m = probe.measureText(s.text);
       const fit = Math.min(
         1,
-        (width * 0.9) / Math.max(m.actualBoundingBoxLeft + m.actualBoundingBoxRight, 1),
-        (height * 0.66) / Math.max(m.actualBoundingBoxAscent + m.actualBoundingBoxDescent, 1)
+        (width * 0.95) / Math.max(m.actualBoundingBoxLeft + m.actualBoundingBoxRight, 1),
+        (height * 0.85) / Math.max(m.actualBoundingBoxAscent + m.actualBoundingBoxDescent, 1)
       );
       const size = s.fontSize * fit;
       setFont(probe, s, size);
@@ -311,7 +311,7 @@ const TechText = ({
     };
 
     const glyphAt = (x, y) => {
-      if (!word || y < word.top - 24 || y > word.bottom + 24) return -1;
+      if (!word || y < word.top - 18 || y > word.bottom + 18) return -1;
       let best = -1;
       let bestDistance = Infinity;
       glyphs.forEach((glyph, i) => {
@@ -323,7 +323,7 @@ const TechText = ({
           best = i;
         }
       });
-      return bestDistance < 28 ? best : -1;
+      return bestDistance < 20 ? best : -1;
     };
 
     const falloff = (target, cx, cy, radius, strength, softness) => {
@@ -403,9 +403,12 @@ const TechText = ({
       if (w < 2 || h < 2) return;
       const perimeter = 2 * (w + h);
       const seed = frame.index + 1;
-      const grid = 3;
+      const grid = 2;
       ctx.fillStyle = accent;
       ctx.strokeStyle = accent;
+
+      const isCompact = !word || word.size < 24;
+      const maxSpeck = isCompact ? 2 : 8;
 
       for (let k = 0; k < s.specks; k++) {
         const period = 0.5 + noise(seed, k, 11) * 1.2;
@@ -415,9 +418,10 @@ const TechText = ({
         if (life > 0.7) continue;
         const [px, py, nx, ny] = perimeterPoint(noise(seed, k, cycle) * perimeter, w, h);
         const pick = noise(seed, k, cycle, 2);
-        const size = pick < 0.46 ? 2 : pick < 0.7 ? 3 : pick < 0.84 ? 5 : pick < 0.94 ? 8 : 11;
-        const large = size >= 8;
-        const out = (large ? 9 : 4) + Math.floor(noise(seed, k, cycle, 1) * 5) * grid;
+        const rawSize = pick < 0.46 ? 1.5 : pick < 0.7 ? 2 : pick < 0.84 ? 3 : pick < 0.94 ? 4 : 5;
+        const size = Math.min(rawSize, maxSpeck);
+        const large = size >= 4;
+        const out = (large ? 4 : 2) + Math.floor(noise(seed, k, cycle, 1) * 3) * grid;
         const x = frame.x1 + Math.round((px + nx * out - frame.x1) / grid) * grid;
         const y = frame.y1 + Math.round((py + ny * out - frame.y1) / grid) * grid;
         const tone = noise(seed, k, cycle, 3);
@@ -428,7 +432,7 @@ const TechText = ({
         ctx.globalAlpha = alpha;
         if (tone < 0.26 || (large && tone < 0.78)) {
           ctx.strokeRect(left + 0.5, top + 0.5, size, size);
-          if (large && tone > 0.5) ctx.fillRect(Math.round(x) - 1, Math.round(y) - 1, 2, 2);
+          if (large && tone > 0.5) ctx.fillRect(Math.round(x) - 1, Math.round(y) - 1, 1.5, 1.5);
         } else {
           ctx.fillRect(left, top, size, size);
         }
@@ -436,9 +440,9 @@ const TechText = ({
 
       for (let j = 0; j < 2; j++) {
         const head = (pulse * 0.42 * s.speed + j * 0.5) * perimeter;
-        for (let i = 0; i < 4; i++) {
-          const [x, y] = perimeterPoint(head - i * 6, w, h);
-          const size = i === 0 ? 3 : 2;
+        for (let i = 0; i < (isCompact ? 2 : 4); i++) {
+          const [x, y] = perimeterPoint(head - i * 4, w, h);
+          const size = i === 0 ? (isCompact ? 2 : 3) : (isCompact ? 1.5 : 2);
           ctx.globalAlpha = a * [0.95, 0.55, 0.32, 0.16][i];
           ctx.fillRect(Math.round(x - size / 2), Math.round(y - size / 2), size, size);
         }
@@ -460,7 +464,7 @@ const TechText = ({
       ctx.lineWidth = 1;
 
       const moved = Math.hypot(glyph.offset.x, glyph.offset.y);
-      if (moved > 1) {
+      if (moved > 2 && s.draggable) {
         const hx = (glyph.box.x1 + glyph.box.x2) / 2;
         const hy = (glyph.box.y1 + glyph.box.y2) / 2;
         ctx.beginPath();
@@ -478,9 +482,11 @@ const TechText = ({
 
       ctx.beginPath();
       ctx.rect(x1, y1, x2 - x1, y2 - y1);
-      ctx.globalAlpha = 0.5 * a;
+      ctx.globalAlpha = 0.55 * a;
       ctx.stroke();
 
+      const cornerSize = !word || word.size < 24 ? 2.5 : 4;
+      const cHalf = Math.floor(cornerSize / 2);
       ctx.beginPath();
       for (const [cx, cy] of [
         [x1, y1],
@@ -488,7 +494,7 @@ const TechText = ({
         [x2, y2],
         [x1, y2]
       ]) {
-        ctx.rect(Math.round(cx) - 2, Math.round(cy) - 2, 5, 5);
+        ctx.rect(Math.round(cx) - cHalf, Math.round(cy) - cHalf, cornerSize, cornerSize);
       }
       ctx.globalAlpha = 0.95 * a;
       ctx.fill();
@@ -496,7 +502,7 @@ const TechText = ({
 
       if (s.specks > 0) drawSpecks(s, a, accent);
 
-      if (!s.labels) return;
+      if (!s.labels || (word && word.size < 24)) return;
       ctx.font = LABEL_FONT;
       ctx.textAlign = 'left';
       ctx.textBaseline = 'bottom';
@@ -780,17 +786,20 @@ const TechText = ({
       const focus = introducing ? typing : dragging >= 0 ? dragging : active ? glyphAt(lens.x, lens.y) : -1;
       if (focus >= 0 && s.selection) {
         const glyph = glyphs[focus];
-        const bx1 = glyph.box.x1 + glyph.offset.x - 6;
-        const by1 = glyph.box.y1 + glyph.offset.y - 6;
-        const bx2 = glyph.box.x2 + glyph.offset.x + 6;
-        const by2 = glyph.box.y2 + glyph.offset.y + 6;
+        const isCompact = !word || word.size < 24;
+        const padX = isCompact ? 2 : 6;
+        const padY = isCompact ? 2.5 : 6;
+        const bx1 = glyph.box.x1 + glyph.offset.x - padX;
+        const by1 = glyph.box.y1 + glyph.offset.y - padY;
+        const bx2 = glyph.box.x2 + glyph.offset.x + padX;
+        const by2 = glyph.box.y2 + glyph.offset.y + padY;
         if (frame.index < 0 || frame.alpha < 0.02) {
           frame.x1 = bx1;
           frame.y1 = by1;
           frame.x2 = bx2;
           frame.y2 = by2;
         }
-        const glide = focus === dragging ? 0.02 : 0.08;
+        const glide = focus === dragging ? 0.02 : 0.05;
         frame.x1 = approach(frame.x1, bx1, dt, glide);
         frame.y1 = approach(frame.y1, by1, dt, glide);
         frame.x2 = approach(frame.x2, bx2, dt, glide);
@@ -808,7 +817,7 @@ const TechText = ({
             ? 1
             : 0;
         if (introducing && glyph.shown === 0) glyph.outline = target;
-        glyph.outline = approach(glyph.outline, target, dt, 0.09);
+        glyph.outline = approach(glyph.outline, target, dt, 0.06);
         if (Math.abs(glyph.outline - target) > 0.002) moving = true;
         else glyph.outline = target;
       });
@@ -1000,3 +1009,4 @@ const TechText = ({
 };
 
 export default TechText;
+
