@@ -137,6 +137,9 @@ export default function PerformancePage() {
           </div>
         </Card>
       )}
+      {cycle && !myReview && (
+        <Card><EmptyState title="Not enrolled in this cycle" description={`“${cycle.name}” is active, but you do not have an assigned review in this cycle.`} /></Card>
+      )}
       {!cycle && (
         <Card><EmptyState title="No active review cycle" description="HR will notify you when the next cycle opens." /></Card>
       )}

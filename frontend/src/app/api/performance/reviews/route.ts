@@ -46,3 +46,4 @@ export async function GET(req: Request) {
     return NextResponse.json({ ok: false, error: "Failed to fetch reviews." }, { status: 500 });
   }
 }
+

@@ -49,9 +49,10 @@ function Cycles() {
   const [error, setError] = useState<string | null>(null);
   const [openReview, setOpenReview] = useState<string | null>(null);
   const [filter, setFilter] = useState("ALL");
-  const cycle = db.cycles.find((c) => c.id === selected);
-  const reviews = db.reviews.filter((r) => r.cycleId === selected && (filter === "ALL" || r.status === filter));
-  const all = db.reviews.filter((r) => r.cycleId === selected);
+  const cycle = db.cycles.find((c) => c.id === selected) || db.cycles.find((c) => c.status === "ACTIVE") || db.cycles[0];
+  const activeCycleId = cycle?.id ?? selected;
+  const reviews = db.reviews.filter((r) => r.cycleId === activeCycleId && (filter === "ALL" || r.status === filter));
+  const all = db.reviews.filter((r) => r.cycleId === activeCycleId);
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
@@ -163,7 +164,8 @@ function ReviewModal({ reviewId, onClose }: { reviewId: string | null; onClose: 
     setComment(review.managerComment);
   }
   if (!review) return null;
-  const cycle = db.cycles.find((c) => c.id === review.cycleId)!;
+  const cycle = db.cycles.find((c) => c.id === review.cycleId);
+  if (!cycle) return null;
   const e = db.employees.find((x) => x.id === review.employeeId);
   const end = cycle.endDate < today() ? cycle.endDate : today();
   const goals = db.goals.filter((g) => g.employeeId === review.employeeId);
@@ -299,11 +301,12 @@ function Goals() {
 function Distribution() {
   const { db } = useAuthed();
   const [cycleId, setCycleId] = useState(db.cycles[db.cycles.length - 1]?.id ?? "");
+  const effectiveCycleId = cycleId || db.cycles[db.cycles.length - 1]?.id || "";
   const data = useMemo(() => {
-    const rs = db.reviews.filter((r) => r.cycleId === cycleId);
+    const rs = db.reviews.filter((r) => r.cycleId === effectiveCycleId);
     const bucket = (k: "selfRating" | "managerRating") => [1, 2, 3, 4, 5].map((n) => rs.filter((r) => r[k] === n).length);
     return { self: bucket("selfRating"), mgr: bucket("managerRating"), total: rs.length };
-  }, [db, cycleId]);
+  }, [db, effectiveCycleId]);
   const max = Math.max(1, ...data.self, ...data.mgr);
   const labels = ["Needs improvement", "Below expectations", "Meets expectations", "Exceeds expectations", "Outstanding"];
   return (

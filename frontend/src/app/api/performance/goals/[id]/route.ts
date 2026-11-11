@@ -83,3 +83,4 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
     return NextResponse.json({ ok: false, error: "Failed to delete goal." }, { status: 500 });
   }
 }
+

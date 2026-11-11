@@ -50,3 +50,4 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     return NextResponse.json({ ok: false, error: "Failed to submit self review." }, { status: 500 });
   }
 }
+
