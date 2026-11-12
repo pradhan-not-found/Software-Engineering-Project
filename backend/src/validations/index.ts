@@ -9,3 +9,4 @@ export * from "./dashboard.schema";
 export * from "./expense.schema";
 export * from "./performance.schema";
 export * from "./access.schema";
+export * from "./report.schema";

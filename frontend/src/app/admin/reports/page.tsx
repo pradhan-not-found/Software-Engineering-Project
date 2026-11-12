@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { Download } from "lucide-react";
 import { useAuthed } from "@/lib/store";
 import type { LeaveTypeKey } from "@/lib/types";
@@ -22,9 +22,13 @@ function Bar({ label, value, max, color = "blue", display }: { label: React.Reac
 }
 
 export default function AdminReportsPage() {
-  const { db } = useAuthed();
+  const { db, fetchReportsOverview } = useAuthed();
   const t = today();
   const active = db.employees.filter((e) => e.status !== "TERMINATED");
+
+  useEffect(() => {
+    fetchReportsOverview().catch(() => {});
+  }, [fetchReportsOverview]);
 
   const byDept = useMemo(
     () => db.departments.map((d) => ({ d, n: active.filter((e) => e.departmentId === d.id).length })).sort((a, b) => b.n - a.n),
@@ -76,7 +80,23 @@ export default function AdminReportsPage() {
       .slice(0, 8);
   }, [db, active, t]);
 
-  const exportHeadcount = () =>
+  const exportHeadcount = async () => {
+    try {
+      const res = await fetch("/api/reports/export?dataset=headcount");
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `headcount-${t}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        return;
+      }
+    } catch {
+      /* fallback to client CSV */
+    }
+
     downloadText(
       `headcount-${t}.csv`,
       toCSV([
@@ -88,6 +108,7 @@ export default function AdminReportsPage() {
       ]),
       "text/csv",
     );
+  };
 
   const maxDept = Math.max(1, ...byDept.map((x) => x.n));
   const maxCost = Math.max(1, ...deptCost.map((x) => x.cost));

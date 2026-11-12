@@ -11,3 +11,4 @@ export * from "./dashboard.repository";
 export * from "./expense.repository";
 export * from "./performance.repository";
 export * from "./access.repository";
+export * from "./report.repository";

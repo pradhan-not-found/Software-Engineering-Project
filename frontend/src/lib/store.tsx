@@ -1541,6 +1541,31 @@ function useStoreValue() {
       }
     };
 
+    const fetchReportsOverview = async (filter?: {
+      period?: "7d" | "30d" | "90d" | "ytd" | "1y";
+      startDate?: string;
+      endDate?: string;
+      departmentId?: string;
+    }) => {
+      try {
+        const params = new URLSearchParams();
+        if (filter?.period) params.set("period", filter.period);
+        if (filter?.startDate) params.set("startDate", filter.startDate);
+        if (filter?.endDate) params.set("endDate", filter.endDate);
+        if (filter?.departmentId) params.set("departmentId", filter.departmentId);
+
+        const res = await fetch(`/api/reports/overview?${params.toString()}`);
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          return { ok: false as const, error: err.error || "Failed to fetch reports overview." };
+        }
+        const json = await res.json();
+        return { ok: true as const, data: json.data };
+      } catch (err: any) {
+        return { ok: false as const, error: err.message || "Network error fetching reports overview." };
+      }
+    };
+
     return {
       login, logout, signup, changePassword, resetDemo,
       addEmployee, updateEmployee, completeOnboarding, toggleOnboardingDoc, setOfferStatus,
@@ -1556,6 +1581,7 @@ function useStoreValue() {
       saveGoal, deleteGoal, createCycle, closeCycle, submitSelfReview, submitManagerReview, addPeerFeedback,
       markRead, markAllRead, clearNotifications,
       fetchDashboardOverview,
+      fetchReportsOverview,
     };
   }, [mutate, setSession]);
 
