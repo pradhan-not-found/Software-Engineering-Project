@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BellOff, CheckCheck, Download, Trash2, Zap } from "lucide-react";
 import { useAuthed } from "@/lib/store";
 import type { NotificationCategory } from "@/lib/types";
@@ -11,13 +11,17 @@ import { Avatar, Badge, Button, Card, EmptyState, PageHeader, SearchInput, Selec
 const CAT_COLOR: Record<NotificationCategory, string> = { HR: "pink", WORK: "blue", SYSTEM: "gray" };
 
 export default function NotificationsCenter({ variant }: { variant: "admin" | "employee" }) {
-  const { db, user, markRead, markAllRead, clearNotifications } = useAuthed();
+  const { db, user, markRead, markAllRead, clearNotifications, fetchNotifications, fetchAuditLog } = useAuthed();
   const router = useRouter();
   const [tab, setTab] = useState<"inbox" | "audit">("inbox");
   const [cat, setCat] = useState<"ALL" | NotificationCategory>("ALL");
   const [unreadOnly, setUnreadOnly] = useState(false);
   const [q, setQ] = useState("");
   const [entity, setEntity] = useState("");
+
+  useEffect(() => {
+    fetchNotifications().catch(() => {});
+  }, [fetchNotifications]);
 
   const mine = db.notifications
     .filter((n) => n.recipientId === user.id)
@@ -26,18 +30,37 @@ export default function NotificationsCenter({ variant }: { variant: "admin" | "e
   const unread = db.notifications.filter((n) => n.recipientId === user.id && !n.read).length;
   const showAudit = variant === "admin" && isAdminRole(user.role);
 
+  useEffect(() => {
+    if (tab === "audit" && showAudit) {
+      fetchAuditLog({ category: cat !== "ALL" ? cat : undefined, entity: entity || undefined, query: q || undefined }).catch(() => {});
+    }
+  }, [tab, showAudit, cat, entity, q, fetchAuditLog]);
+
   const entities = Array.from(new Set(db.activity.map((a) => a.entity))).sort();
   const audit = db.activity
     .filter((a) => cat === "ALL" || a.category === cat)
     .filter((a) => !entity || a.entity === entity)
     .filter((a) => !q || a.message.toLowerCase().includes(q.toLowerCase()));
 
-  const exportAudit = () =>
+  const exportAudit = async () => {
+    try {
+      const params = new URLSearchParams();
+      if (cat !== "ALL") params.set("category", cat);
+      if (entity) params.set("entity", entity);
+      if (q) params.set("query", q);
+      const res = await fetch(`/api/activity/export?${params.toString()}`);
+      if (res.ok) {
+        const text = await res.text();
+        downloadText("audit-log.csv", text, "text/csv");
+        return;
+      }
+    } catch {}
     downloadText(
       "audit-log.csv",
       toCSV([["Timestamp", "Actor", "Action", "Entity", "Category", "Message"], ...audit.map((a) => [a.at, a.actorId ? fullName(db.employees.find((e) => e.id === a.actorId)) : "System", a.action, a.entity, a.category, a.message])]),
       "text/csv",
     );
+  };
 
   return (
     <>

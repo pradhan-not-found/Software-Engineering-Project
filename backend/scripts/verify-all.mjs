@@ -21,6 +21,7 @@ const suites = [
   { name: "Page 10: Access Control & Role-Based Permissions (RBAC)", script: "verify-page10.mjs" },
   { name: "Page 11: Reports & Executive Analytics Engine", script: "verify-page11.mjs" },
   { name: "Page 12: Organization Settings, Workspaces & Holiday Calendar", script: "verify-page12.mjs" },
+  { name: "Page 13: Notifications Center & Organization Activity Feed", script: "verify-page13.mjs" },
 ];
 
 console.log("================================================================================");

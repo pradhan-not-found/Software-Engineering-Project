@@ -1545,23 +1545,104 @@ function useStoreValue() {
       });
 
     /* -------------------------- Notifications ------------------------- */
-    const markRead = (id: string) =>
+    const markRead = (id: string) => {
       mutate((db) => {
         const n = db.notifications.find((x) => x.id === id);
         if (n) n.read = true;
       });
 
-    const markAllRead = () =>
+      fetch(`/api/notifications/${id}/read`, {
+        method: "PATCH",
+        headers: {
+          ...(sessionRef.current ? { "x-session-id": sessionRef.current } : {}),
+        },
+      }).catch((err) => console.error("API markRead error:", err));
+    };
+
+    const markAllRead = () => {
       mutate((db, actor) => {
         db.notifications.forEach((n) => {
           if (n.recipientId === actor?.id) n.read = true;
         });
       });
 
-    const clearNotifications = () =>
+      fetch("/api/notifications/mark-all-read", {
+        method: "POST",
+        headers: {
+          ...(sessionRef.current ? { "x-session-id": sessionRef.current } : {}),
+        },
+      }).catch((err) => console.error("API markAllRead error:", err));
+    };
+
+    const clearNotifications = () => {
       mutate((db, actor) => {
         db.notifications = db.notifications.filter((n: Notification) => n.recipientId !== actor?.id);
       });
+
+      fetch("/api/notifications/clear", {
+        method: "DELETE",
+        headers: {
+          ...(sessionRef.current ? { "x-session-id": sessionRef.current } : {}),
+        },
+      }).catch((err) => console.error("API clearNotifications error:", err));
+    };
+
+    const fetchNotifications = async (filter?: { category?: string; unreadOnly?: boolean }) => {
+      try {
+        const params = new URLSearchParams();
+        if (filter?.category && filter.category !== "ALL") params.set("category", filter.category);
+        if (filter?.unreadOnly) params.set("unreadOnly", "true");
+        const res = await fetch(`/api/notifications?${params.toString()}`, {
+          headers: {
+            ...(sessionRef.current ? { "x-session-id": sessionRef.current } : {}),
+          },
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          return { ok: false as const, error: err.error || "Failed to fetch notifications." };
+        }
+        const json = await res.json();
+        if (json.ok && json.data) {
+          mutate((db) => {
+            const incomingIds = new Set(json.data.notifications.map((n: Notification) => n.id));
+            const others = db.notifications.filter((n) => !incomingIds.has(n.id));
+            db.notifications = [...json.data.notifications, ...others];
+          });
+          return { ok: true as const, data: json.data };
+        }
+        return { ok: false as const, error: json.error || "Unknown error." };
+      } catch (err: any) {
+        return { ok: false as const, error: err?.message || "Network error fetching notifications." };
+      }
+    };
+
+    const fetchAuditLog = async (filter?: { category?: string; entity?: string; query?: string }) => {
+      try {
+        const params = new URLSearchParams();
+        if (filter?.category && filter.category !== "ALL") params.set("category", filter.category);
+        if (filter?.entity) params.set("entity", filter.entity);
+        if (filter?.query) params.set("query", filter.query);
+        const res = await fetch(`/api/activity?${params.toString()}`, {
+          headers: {
+            ...(sessionRef.current ? { "x-session-id": sessionRef.current } : {}),
+          },
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          return { ok: false as const, error: err.error || "Failed to fetch audit log." };
+        }
+        const json = await res.json();
+        if (json.ok && json.data) {
+          mutate((db) => {
+            db.activity = json.data.logs;
+          });
+          return { ok: true as const, data: json.data };
+        }
+        return { ok: false as const, error: json.error || "Unknown error." };
+      } catch (err: any) {
+        return { ok: false as const, error: err?.message || "Network error fetching audit log." };
+      }
+    };
 
     const fetchDashboardOverview = async (filter?: { date?: string; category?: "ALL" | "HR" | "WORK" | "SYSTEM" }) => {
       try {
@@ -1633,6 +1714,7 @@ function useStoreValue() {
       generatePayroll, recalcPayroll, setPayrollStatus, deletePayrollRun, updateSalary,
       saveGoal, deleteGoal, createCycle, closeCycle, submitSelfReview, submitManagerReview, addPeerFeedback,
       markRead, markAllRead, clearNotifications,
+      fetchNotifications, fetchAuditLog,
       fetchDashboardOverview,
       fetchReportsOverview,
       fetchSettingsOverview,
