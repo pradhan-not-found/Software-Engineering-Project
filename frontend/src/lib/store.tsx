@@ -384,6 +384,16 @@ function useStoreValue() {
         if (me.password !== current) return { ok: false, error: "Current password is incorrect." };
         if (next.length < 6) return { ok: false, error: "New password must be at least 6 characters." };
         me.password = next;
+
+        fetch("/api/profile/password", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(actor?.id ? { "x-session-id": actor.id } : {}),
+          },
+          body: JSON.stringify({ currentPassword: current, newPassword: next }),
+        }).catch((err) => console.error("API changePassword error:", err));
+
         return { ok: true };
       });
 
@@ -565,9 +575,18 @@ function useStoreValue() {
       });
 
     const toggleOnboardingDoc = (id: string, itemId: string) =>
-      mutate((db) => {
+      mutate((db, actor) => {
         const item = emp(db, id)?.onboarding?.documentsRequired.find((d) => d.id === itemId);
         if (item) item.done = !item.done;
+
+        fetch("/api/profile/onboarding-doc", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(actor?.id ? { "x-session-id": actor.id } : {}),
+          },
+          body: JSON.stringify({ docId: itemId }),
+        }).catch((err) => console.error("API toggleOnboardingDoc error:", err));
       });
 
     const setOfferStatus = (id: string, status: "DRAFT" | "SENT" | "ACCEPTED") =>
@@ -717,6 +736,15 @@ function useStoreValue() {
         if (!e) return;
         e.documents.push({ ...doc, id: uid("doc"), uploadedAt: today(), verified: false });
         pushActivity(db, actor?.id ?? null, "CREATE", "Document", `${fullName(actor)} uploaded “${doc.name}” for ${fullName(e)}.`, "HR");
+
+        fetch("/api/profile/documents", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(actor?.id ? { "x-session-id": actor.id } : {}),
+          },
+          body: JSON.stringify(doc),
+        }).catch((err) => console.error("API addDocument error:", err));
       });
 
     const verifyDocument = (id: string, docId: string) =>
@@ -1753,6 +1781,24 @@ function useStoreValue() {
         return { ok: true, data: e };
       });
 
+    const fetchProfile = async () => {
+      try {
+        const res = await fetch("/api/profile/me", {
+          headers: {
+            ...(sessionRef.current ? { "x-session-id": sessionRef.current } : {}),
+          },
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          return { ok: false as const, error: err.error || "Failed to fetch profile." };
+        }
+        const json = await res.json();
+        return { ok: true as const, data: json.data };
+      } catch (err: any) {
+        return { ok: false as const, error: err?.message || "Network error fetching profile." };
+      }
+    };
+
     return {
       login, logout, signup, changePassword, resetDemo,
       addEmployee, updateEmployee, completeOnboarding, toggleOnboardingDoc, setOfferStatus,
@@ -1772,6 +1818,7 @@ function useStoreValue() {
       fetchReportsOverview,
       fetchSettingsOverview,
       fetchOrgChart, reassignManager,
+      fetchProfile,
     };
   }, [mutate, setSession]);
 

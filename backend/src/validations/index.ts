@@ -13,3 +13,4 @@ export * from "./report.schema";
 export * from "./settings.schema";
 export * from "./notification.schema";
 export * from "./org-chart.schema";
+export * from "./profile.schema";

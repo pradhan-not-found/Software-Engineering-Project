@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Award, Briefcase, CheckCircle2, FileText, KeyRound, Laptop, Mail, MapPin, Pencil, Phone, Upload } from "lucide-react";
 import { useAuthed } from "@/lib/store";
 import type { Employee, EmployeeDocument } from "@/lib/types";
@@ -14,8 +14,12 @@ import { formatDate, fullName, getDirectReports, getManagerChain, ROLE_LABEL } f
 const DOC_TYPES: EmployeeDocument["type"][] = ["ID Proof", "Address Proof", "Education", "Certification", "Contract", "Other"];
 
 export default function ProfilePage() {
-  const { db, user, updateEmployee, addDocument, changePassword, toggleOnboardingDoc } = useAuthed();
+  const { db, user, updateEmployee, addDocument, changePassword, toggleOnboardingDoc, fetchProfile } = useAuthed();
   const toast = useToast();
+
+  useEffect(() => {
+    fetchProfile().catch(() => {});
+  }, [fetchProfile]);
   const dept = db.departments.find((d) => d.id === user.departmentId);
   const manager = db.employees.find((e) => e.id === user.managerId);
   const buddy = db.employees.find((e) => e.id === user.buddyId);
