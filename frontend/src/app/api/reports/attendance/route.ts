@@ -49,3 +49,4 @@ export async function GET(req: Request) {
     return NextResponse.json({ ok: false, error: "Failed to fetch attendance report." }, { status: 500 });
   }
 }
+
