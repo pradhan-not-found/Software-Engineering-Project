@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AlertTriangle, ArrowRightLeft, Check, UsersRound, X } from "lucide-react";
 import { suggestPeers, useAuthed } from "@/lib/store";
 import type { Review } from "@/lib/types";
@@ -14,9 +14,13 @@ import {
 } from "@/lib/utils";
 
 export default function MyTeamPage() {
-  const { db, user, decideLeave, decideTimesheet, reassignTask, submitManagerReview } = useAuthed();
+  const { db, user, decideLeave, decideTimesheet, reassignTask, submitManagerReview, fetchTeamOverview } = useAuthed();
   const toast = useToast();
   const t = today();
+
+  useEffect(() => {
+    fetchTeamOverview?.().catch((err) => console.error("Error fetching team overview:", err));
+  }, [fetchTeamOverview]);
   const reports = getDirectReports(db.employees, user.id);
   const subs = getSubordinates(db.employees, user.id).filter((e) => e.status !== "TERMINATED");
   const [comments, setComments] = useState<Record<string, string>>({});

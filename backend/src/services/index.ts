@@ -15,3 +15,4 @@ export * from "./settings.service";
 export * from "./notification.service";
 export * from "./org-chart.service";
 export * from "./profile.service";
+export * from "./team.service";

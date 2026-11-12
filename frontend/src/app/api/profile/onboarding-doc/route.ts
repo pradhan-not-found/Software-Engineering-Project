@@ -50,3 +50,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "Failed to toggle onboarding document." }, { status: 500 });
   }
 }
+

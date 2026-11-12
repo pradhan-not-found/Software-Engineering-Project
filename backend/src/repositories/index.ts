@@ -16,3 +16,4 @@ export * from "./settings.repository";
 export * from "./notification.repository";
 export * from "./org-chart.repository";
 export * from "./profile.repository";
+export * from "./team.repository";

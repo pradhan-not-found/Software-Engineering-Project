@@ -1214,6 +1214,14 @@ function useStoreValue() {
         task.comments.push({ id: uid("c"), authorId: actor.id, text: `Reassigned from ${fullName(emp(db, fromId))} to ${fullName(emp(db, toId))}.`, at: new Date().toISOString() });
         pushNotification(db, [toId], "Task reassigned to you", `${fullName(actor)} reassigned “${task.title}” to you.`, "WORK", "/employee/tasks");
         pushActivity(db, actor.id, "UPDATE", "Task", `${fullName(actor)} reassigned “${task.title}” to ${fullName(emp(db, toId))}.`, "WORK");
+        fetch("/api/team/reassign-task", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(actor?.id ? { "x-session-id": actor.id } : {}),
+          },
+          body: JSON.stringify({ taskId, fromEmployeeId: fromId, toEmployeeId: toId }),
+        }).catch((err) => console.error("API reassignTask error:", err));
         return { ok: true };
       });
 
@@ -1799,6 +1807,27 @@ function useStoreValue() {
       }
     };
 
+    const fetchTeamOverview = async (filter?: { date?: string; includeIndirect?: boolean }) => {
+      try {
+        const params = new URLSearchParams();
+        if (filter?.date) params.set("date", filter.date);
+        if (filter?.includeIndirect !== undefined) params.set("includeIndirect", String(filter.includeIndirect));
+        const res = await fetch(`/api/team/overview?${params.toString()}`, {
+          headers: {
+            ...(sessionRef.current ? { "x-session-id": sessionRef.current } : {}),
+          },
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          return { ok: false as const, error: err.error || "Failed to fetch team overview." };
+        }
+        const json = await res.json();
+        return { ok: true as const, data: json.data };
+      } catch (err: any) {
+        return { ok: false as const, error: err?.message || "Network error fetching team overview." };
+      }
+    };
+
     return {
       login, logout, signup, changePassword, resetDemo,
       addEmployee, updateEmployee, completeOnboarding, toggleOnboardingDoc, setOfferStatus,
@@ -1819,6 +1848,7 @@ function useStoreValue() {
       fetchSettingsOverview,
       fetchOrgChart, reassignManager,
       fetchProfile,
+      fetchTeamOverview,
     };
   }, [mutate, setSession]);
 

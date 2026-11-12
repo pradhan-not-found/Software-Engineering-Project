@@ -22,6 +22,7 @@ const suites = [
   { name: "Frontend Page 13: Notifications Center & Organization Activity Feed", script: "verify-frontend-page13.mjs" },
   { name: "Frontend Page 14: Organization Hierarchy & Visual Org Chart", script: "verify-frontend-page14.mjs" },
   { name: "Frontend Page 15: My Profile & Employee Self-Service", script: "verify-frontend-page15.mjs" },
+  { name: "Frontend Page 16: My Team & Department Collaboration Hub", script: "verify-frontend-page16.mjs" },
 ];
 
 console.log("================================================================================");
