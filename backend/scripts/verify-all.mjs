@@ -18,6 +18,7 @@ const suites = [
   { name: "Page 7: Admin Overview Dashboard & Executive Analytics", script: "verify-page7.mjs" },
   { name: "Page 8: Expenses, Reimbursements & Connected Payroll Linking", script: "verify-page8.mjs" },
   { name: "Page 9: Performance Management & Connected Objective Delivery Engine", script: "verify-page9.mjs" },
+  { name: "Page 10: Access Control & Role-Based Permissions (RBAC)", script: "verify-page10.mjs" },
 ];
 
 console.log("================================================================================");

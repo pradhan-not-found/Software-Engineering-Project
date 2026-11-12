@@ -641,6 +641,16 @@ function useStoreValue() {
         e.role = role;
         pushActivity(db, actor?.id ?? null, "UPDATE", "User", `${fullName(actor)} changed ${fullName(e)}'s role to ${role}.`, "SYSTEM");
         pushNotification(db, [id], "Role updated", `Your access role is now ${role.replace("_", " ")}.`, "SYSTEM", null);
+
+        fetch("/api/access/roles", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(actor?.id ? { "x-session-id": actor.id } : {}),
+          },
+          body: JSON.stringify({ employeeId: id, role }),
+        }).catch((err) => console.error("API setRole error:", err));
+
         return { ok: true };
       });
 
@@ -651,6 +661,16 @@ function useStoreValue() {
         if (id === actor?.id) return { ok: false, error: "You cannot suspend your own account." };
         e.accountStatus = status;
         pushActivity(db, actor?.id ?? null, "UPDATE", "User", `${fullName(actor)} ${status === "SUSPENDED" ? "suspended" : "re-activated"} ${fullName(e)}'s account.`, "SYSTEM");
+
+        fetch("/api/access/status", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(actor?.id ? { "x-session-id": actor.id } : {}),
+          },
+          body: JSON.stringify({ employeeId: id, status }),
+        }).catch((err) => console.error("API setAccountStatus error:", err));
+
         return { ok: true };
       });
 
@@ -660,6 +680,15 @@ function useStoreValue() {
         if (!e) return;
         e.password = DEMO_PASSWORD;
         pushActivity(db, actor?.id ?? null, "UPDATE", "User", `${fullName(actor)} reset ${fullName(e)}'s password.`, "SYSTEM");
+
+        fetch("/api/access/reset-password", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(actor?.id ? { "x-session-id": actor.id } : {}),
+          },
+          body: JSON.stringify({ employeeId: id }),
+        }).catch((err) => console.error("API resetPassword error:", err));
       });
 
     const togglePermission = (role: Role, module: ModuleKey) =>
@@ -667,6 +696,15 @@ function useStoreValue() {
         if (role === "SUPER_ADMIN" && module === "access") return; // never lock out super admins
         db.permissions[role][module] = !db.permissions[role][module];
         pushActivity(db, actor?.id ?? null, "UPDATE", "Permission", `${fullName(actor)} ${db.permissions[role][module] ? "granted" : "revoked"} ${module} for ${role}.`, "SYSTEM");
+
+        fetch("/api/access/permissions/toggle", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(actor?.id ? { "x-session-id": actor.id } : {}),
+          },
+          body: JSON.stringify({ role, module }),
+        }).catch((err) => console.error("API togglePermission error:", err));
       });
 
     const addDocument = (id: string, doc: Omit<EmployeeDocument, "id" | "uploadedAt" | "verified">) =>
