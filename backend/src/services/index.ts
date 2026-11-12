@@ -11,3 +11,4 @@ export * from "./expense.service";
 export * from "./performance.service";
 export * from "./access.service";
 export * from "./report.service";
+export * from "./settings.service";

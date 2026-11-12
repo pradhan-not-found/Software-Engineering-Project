@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CalendarDays, KeyRound, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { useAuthed } from "@/lib/store";
 import type { Holiday } from "@/lib/types";
@@ -12,12 +12,16 @@ import { DEMO_ACCOUNTS, DEMO_PASSWORD } from "@/lib/seed";
 import { COLOR_CLASSES, formatDate, fullName, today } from "@/lib/utils";
 
 export default function SettingsPage() {
-  const { db, updateOrg, addHoliday, removeHoliday, resetDemo } = useAuthed();
+  const { db, updateOrg, addHoliday, removeHoliday, resetDemo, fetchSettingsOverview } = useAuthed();
   const toast = useToast();
   const [orgName, setOrgName] = useState(db.org.name);
   const [deptOpen, setDeptOpen] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
   const [hol, setHol] = useState<{ date: string; name: string; type: Holiday["type"] }>({ date: today(), name: "", type: "Company" });
+
+  useEffect(() => {
+    fetchSettingsOverview().catch(() => {});
+  }, [fetchSettingsOverview]);
 
   const year = new Date().getFullYear();
   const holidays = db.holidays.filter((h) => h.date.startsWith(String(year)));

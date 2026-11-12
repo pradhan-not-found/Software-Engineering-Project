@@ -18,6 +18,7 @@ const suites = [
   { name: "Frontend Page 9: Performance Management & Reviews", script: "verify-frontend-page9.mjs" },
   { name: "Frontend Page 10: Access Control & Role-Based Permissions", script: "verify-frontend-page10.mjs" },
   { name: "Frontend Page 11: Reports & Executive Analytics Engine", script: "verify-frontend-page11.mjs" },
+  { name: "Frontend Page 12: Organization Settings, Workspaces & Holiday Calendar", script: "verify-frontend-page12.mjs" },
 ];
 
 console.log("================================================================================");

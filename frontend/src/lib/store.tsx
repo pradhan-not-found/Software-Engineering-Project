@@ -392,6 +392,10 @@ function useStoreValue() {
       syncStatuses(fresh);
       dbRef.current = fresh;
       setDb(fresh);
+
+      fetch("/api/settings/reset-demo", {
+        method: "POST",
+      }).catch((err) => console.error("API resetDemo error:", err));
     };
 
     /* ---------------------------- Employees --------------------------- */
@@ -744,12 +748,31 @@ function useStoreValue() {
           return { ok: false, error: "Department code already exists." };
         db.departments.push({ id: uid("d"), name, code: code.toUpperCase(), color, headId });
         pushActivity(db, actor?.id ?? null, "CREATE", "Department", `${fullName(actor)} created the ${name} department.`, "HR");
+
+        fetch("/api/settings/departments", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(actor?.id ? { "x-session-id": actor.id } : {}),
+          },
+          body: JSON.stringify({ name, code, color, headId }),
+        }).catch((err) => console.error("API addDepartment error:", err));
+
         return { ok: true };
       });
 
     const updateOrg = (patch: Partial<OrgSettings>) =>
-      mutate((db) => {
+      mutate((db, actor) => {
         Object.assign(db.org, patch);
+
+        fetch("/api/settings/org", {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            ...(actor?.id ? { "x-session-id": actor.id } : {}),
+          },
+          body: JSON.stringify(patch),
+        }).catch((err) => console.error("API updateOrg error:", err));
       });
 
     /* --------------------------- Attendance --------------------------- */
@@ -966,15 +989,31 @@ function useStoreValue() {
       });
 
     const addHoliday = (date: string, name: string, type: "National" | "Regional" | "Company") =>
-      mutate((db) => {
+      mutate((db, actor) => {
         db.holidays.push({ id: uid("h"), date, name, type });
         db.holidays.sort((a, b) => a.date.localeCompare(b.date));
         pushNotification(db, db.employees.map((e) => e.id), "Holiday added", `${name} on ${formatDate(date)} has been added to the holiday calendar.`, "HR", "/employee/leaves");
+
+        fetch("/api/settings/holidays", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(actor?.id ? { "x-session-id": actor.id } : {}),
+          },
+          body: JSON.stringify({ date, name, type }),
+        }).catch((err) => console.error("API addHoliday error:", err));
       });
 
     const removeHoliday = (id: string) =>
-      mutate((db) => {
+      mutate((db, actor) => {
         db.holidays = db.holidays.filter((h) => h.id !== id);
+
+        fetch(`/api/settings/holidays/${id}`, {
+          method: "DELETE",
+          headers: {
+            ...(actor?.id ? { "x-session-id": actor.id } : {}),
+          },
+        }).catch((err) => console.error("API removeHoliday error:", err));
       });
 
     /* ------------------------------ Tasks ----------------------------- */
@@ -1566,6 +1605,20 @@ function useStoreValue() {
       }
     };
 
+    const fetchSettingsOverview = async () => {
+      try {
+        const res = await fetch("/api/settings/overview");
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          return { ok: false as const, error: err.error || "Failed to fetch settings overview." };
+        }
+        const json = await res.json();
+        return { ok: true as const, data: json.data };
+      } catch (err: any) {
+        return { ok: false as const, error: err.message || "Network error fetching settings." };
+      }
+    };
+
     return {
       login, logout, signup, changePassword, resetDemo,
       addEmployee, updateEmployee, completeOnboarding, toggleOnboardingDoc, setOfferStatus,
@@ -1582,6 +1635,7 @@ function useStoreValue() {
       markRead, markAllRead, clearNotifications,
       fetchDashboardOverview,
       fetchReportsOverview,
+      fetchSettingsOverview,
     };
   }, [mutate, setSession]);
 
