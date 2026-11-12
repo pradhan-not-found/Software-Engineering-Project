@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { ChevronDown, ChevronRight, Info, Maximize2, Minimize2 } from "lucide-react";
 import { useAuthed } from "@/lib/store";
 import type { Employee } from "@/lib/types";
@@ -14,11 +14,15 @@ import { cn, fullName, getSubordinates } from "@/lib/utils";
  * Connected wedge #3: task assignment & visibility inherit from this structure.
  */
 export default function OrgChart({ variant }: { variant: "admin" | "employee" }) {
-  const { db, user } = useAuthed();
+  const { db, user, fetchOrgChart } = useAuthed();
   const [q, setQ] = useState("");
   const [dept, setDept] = useState("all");
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [profile, setProfile] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchOrgChart({ departmentId: dept, query: q }).catch(() => {});
+  }, [dept, q, fetchOrgChart]);
 
   const people = useMemo(() => db.employees.filter((e) => e.status !== "TERMINATED"), [db]);
   const childrenOf = (id: string) => people.filter((e) => e.managerId === id);

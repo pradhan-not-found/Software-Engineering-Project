@@ -50,3 +50,4 @@ export async function DELETE(
     return NextResponse.json({ ok: false, error: "Failed to remove holiday." }, { status: 500 });
   }
 }
+

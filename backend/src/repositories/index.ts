@@ -14,3 +14,4 @@ export * from "./access.repository";
 export * from "./report.repository";
 export * from "./settings.repository";
 export * from "./notification.repository";
+export * from "./org-chart.repository";

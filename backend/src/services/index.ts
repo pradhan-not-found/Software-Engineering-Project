@@ -13,3 +13,4 @@ export * from "./access.service";
 export * from "./report.service";
 export * from "./settings.service";
 export * from "./notification.service";
+export * from "./org-chart.service";

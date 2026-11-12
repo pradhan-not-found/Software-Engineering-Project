@@ -87,3 +87,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "Failed to log activity." }, { status: 500 });
   }
 }
+

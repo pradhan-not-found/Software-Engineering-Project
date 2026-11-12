@@ -1700,6 +1700,59 @@ function useStoreValue() {
       }
     };
 
+    const fetchOrgChart = async (filter?: { departmentId?: string; query?: string }) => {
+      try {
+        const params = new URLSearchParams();
+        if (filter?.departmentId && filter.departmentId !== "all") params.set("departmentId", filter.departmentId);
+        if (filter?.query) params.set("query", filter.query);
+        const res = await fetch(`/api/org-chart?${params.toString()}`, {
+          headers: {
+            ...(sessionRef.current ? { "x-session-id": sessionRef.current } : {}),
+          },
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          return { ok: false as const, error: err.error || "Failed to fetch organization chart." };
+        }
+        const json = await res.json();
+        return { ok: true as const, data: json.data };
+      } catch (err: any) {
+        return { ok: false as const, error: err?.message || "Network error fetching org chart." };
+      }
+    };
+
+    const reassignManager = (employeeId: string, managerId: string | null): Result<Employee> =>
+      mutate((db, actor) => {
+        const e = emp(db, employeeId);
+        if (!e) return { ok: false, error: "Employee not found." };
+        if (employeeId === managerId) return { ok: false, error: "An employee cannot be assigned as their own manager." };
+
+        const subs = getSubordinates(db.employees, employeeId);
+        if (managerId && subs.some((s) => s.id === managerId)) {
+          return { ok: false, error: "Cycle detected: Cannot assign an employee to report to their own subordinate." };
+        }
+
+        e.managerId = managerId;
+        const mgr = managerId ? emp(db, managerId) : null;
+        const mgrName = mgr ? fullName(mgr) : "None (Top Level)";
+        pushActivity(db, actor?.id ?? null, "UPDATE", "ReportingLine", `${fullName(actor)} updated ${fullName(e)}'s manager to ${mgrName}.`, "HR");
+        pushNotification(db, [employeeId], "Reporting Line Updated", `Your direct manager has been changed to ${mgrName}.`, "HR", "/employee/org-chart");
+        if (managerId) {
+          pushNotification(db, [managerId], "New Direct Report", `${fullName(e)} now reports directly to you.`, "HR", "/employee/team");
+        }
+
+        fetch("/api/org-chart/reassign", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(actor?.id ? { "x-session-id": actor.id } : {}),
+          },
+          body: JSON.stringify({ employeeId, managerId }),
+        }).catch((err) => console.error("API reassignManager error:", err));
+
+        return { ok: true, data: e };
+      });
+
     return {
       login, logout, signup, changePassword, resetDemo,
       addEmployee, updateEmployee, completeOnboarding, toggleOnboardingDoc, setOfferStatus,
@@ -1718,6 +1771,7 @@ function useStoreValue() {
       fetchDashboardOverview,
       fetchReportsOverview,
       fetchSettingsOverview,
+      fetchOrgChart, reassignManager,
     };
   }, [mutate, setSession]);
 

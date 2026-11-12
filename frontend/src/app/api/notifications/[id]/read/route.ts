@@ -45,3 +45,4 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     return NextResponse.json({ ok: false, error: "Failed to mark notification read." }, { status: 500 });
   }
 }
+

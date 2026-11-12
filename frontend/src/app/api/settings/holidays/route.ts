@@ -72,3 +72,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "Failed to create holiday." }, { status: 500 });
   }
 }
+

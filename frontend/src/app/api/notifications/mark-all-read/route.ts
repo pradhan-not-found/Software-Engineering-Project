@@ -42,3 +42,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "Failed to mark all notifications read." }, { status: 500 });
   }
 }
+
