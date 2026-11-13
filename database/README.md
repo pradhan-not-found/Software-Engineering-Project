@@ -56,7 +56,29 @@ node database/scripts/check-supabase.mjs
 
 ---
 
+## Department & Headcount Distribution (2-3 Members per Category)
+
+Every corporate department is populated with 2 to 3 authentic team members so that directory filters and org views render complete and realistic profiles:
+
+| # | Department Category | Code | Headcount | Team Members (Designations) |
+|---|---------------------|------|-----------|-----------------------------|
+| 1 | **Engineering** | `ENG` | 3 | Vikram Iyer (VP Eng), Varun Nair (Sr DevOps), Sneha Roy (QA Automation) |
+| 2 | **Product & Design** | `PRD` | 2 | Ananya Verma (Lead Product Designer), Siddharth Roy (Principal PM) |
+| 3 | **People & Culture** | `HR` | 2 | Meera Nambiar (Culture & Experience), Aditya Joshi (Talent Acquisition) |
+| 4 | **Growth & Marketing** | `MKT` | 2 | Sarah Jenkins (VP Marketing), Daniel Park (Growth Marketer) |
+| 5 | **Operations & Finance** | `OPS` | 2 | Manish Trivedi (Corporate Ops Mgr), Aman Gupta (Finance Director) |
+| 6 | **Executive Leadership** | `EXE` | 2 | Arjun Mehta (CEO), Tanya Singhal (COO) |
+| 7 | **People Operations** | `HR-OPS` | 2 | Neha Kapoor (VP People Ops), Priya Sen (HR & Talent Ops) |
+| 8 | **Software Engineering** | `ENG-TECH` | 3 | Rohan Sharma (Lead Frontend Architect), Rahul Verma (Sr Frontend), Kavya Nair (Sr Backend) |
+| 9 | **Brand & Growth Marketing** | `MKT-GROW` | 2 | Soubhik Dutta (Assoc Marketing Specialist), Emily Watson (Content Strategist) |
+| 10 | **Product Experience & UI/UX** | `DSN` | 2 | Ishaan Banerjee (Staff Interaction Designer), Ritika Sen (Sr UX Researcher) |
+| 11 | **Data Engineering & AI** | `DAT-AI` | 2 | Robert Chen (Sr Data Scientist), Ananya Ghosh (Head of Data Analytics) |
+| 12 | **Finance & Compliance** | `FIN-OPS` | 2 | Swati Kulkarni (Audit & Compliance), Karan Malhotra (Corporate Accountant) |
+
+---
+
 ## Dual-Layer Fallback & Connected Wedge Sync
 
 - **Cloud Mode**: When `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are provided in `frontend/.env.local`, the DAL connects directly to Supabase PostgreSQL.
 - **In-Memory Fallback Mode**: If network is offline or credentials are unset, the system seamlessly falls back to the deterministic in-memory store (`seed.ts`), ensuring 100% offline test suite reliability.
+

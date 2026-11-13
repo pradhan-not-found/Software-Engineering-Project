@@ -30,14 +30,24 @@ const key = (keyMatch ? keyMatch[1] : 'sb_publishable_W-2IX1Z0rUK-MOkQWfcsMQ_0XD
 async function check() {
   console.log('Connecting to Supabase:', url);
 
-  const empRes = await fetch(`${url}/rest/v1/employees?select=id,first_name,last_name,email,designation,account_status`, {
+  const empRes = await fetch(`${url}/rest/v1/employees?select=id,first_name,last_name,email,designation,department_id,account_status`, {
     headers: { apikey: key, Authorization: `Bearer ${key}` }
   });
   const employees = await empRes.json();
-  console.log(`\nSupabase Employee Count: ${employees.length}`);
+  console.log(`\nSupabase Total Employee Count: ${employees.length}`);
   employees.forEach(e => {
-    console.log(` - [${e.id}] ${e.first_name} ${e.last_name} | ${e.designation} | ${e.email} | ${e.account_status}`);
+    console.log(` - [${e.id}] ${e.first_name} ${e.last_name} | ${e.designation} | Dept: ${e.department_id} | ${e.email}`);
   });
+
+  const deptRes = await fetch(`${url}/rest/v1/departments?select=*`, {
+    headers: { apikey: key, Authorization: `Bearer ${key}` }
+  });
+  const depts = await deptRes.json();
+  console.log(`\nDepartment Distribution (Target: 2-3 per category):`);
+  for (const d of depts) {
+    const matching = employees.filter(e => e.department_id === d.id);
+    console.log(` - [${d.id}] "${d.name}" (${matching.length} employees): ${matching.map(e => `${e.first_name} ${e.last_name}`).join(', ')}`);
+  }
 
   const leavesRes = await fetch(`${url}/rest/v1/leaves?status=eq.PENDING&select=id,employee_id,type,days,reason,status`, {
     headers: { apikey: key, Authorization: `Bearer ${key}` }
