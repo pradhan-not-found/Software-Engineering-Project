@@ -248,31 +248,38 @@ Data is seeded relative to today's date and saved in your browser. Use **Profile
 ```text
 Software-Engineering-Project/
 ├── LICENSE
-├── README.md                              # This file
-├── docs/
-│   ├── content.md                         # Product feature specification
+├── README.md                              # Main project documentation
+├── docs/                                  # Academic & project specifications
+│   ├── content.md                         # Feature specification
+│   ├── data.txt                           # Benchmark data
 │   └── project_overview.tex               # LaTeX academic documentation
-└── frontend/                              # Next.js 14 web application
+├── database/                              # Dedicated Database layer
+│   ├── README.md                          # Database documentation & run guide
+│   ├── schema.sql                         # Complete PostgreSQL DDL schema
+│   ├── supabase_schema.sql                # Supabase schema with RLS & extensions
+│   ├── database_planning.md               # PostgreSQL schema & 4-layer DAL blueprint
+│   └── scripts/                           # Database automation scripts
+│       ├── seed-supabase.mjs              # Live cloud database seeder (18 employees, pending queues)
+│       └── check-supabase.mjs             # Database health, counts & integrity auditor
+├── backend/                               # Dedicated 4-Layer Domain & Service Architecture
+│   ├── package.json · tsconfig.json · README.md
+│   ├── scripts/                           # Master backend verification suites (verify-all.mjs)
+│   └── src/
+│       ├── types/                         # Domain models & entities
+│       ├── validations/                   # Zod input validation schemas
+│       ├── repositories/                  # Data Access Layer (DAL) & Supabase queries
+│       ├── services/                      # Domain business logic & Connected Wedge engine
+│       ├── database/                      # In-memory deterministic seed & Supabase sync
+│       └── index.ts                       # Public API barrel export
+└── frontend/                              # Dedicated Next.js 14 web application
     ├── package.json · tsconfig.json · tailwind.config.ts · next.config.mjs
-    ├── public/                            # Logo, background, fonts, icons
+    ├── public/                            # Static assets, SVG/PNG logos, icons
+    ├── scripts/                           # Master frontend verification suites (verify-frontend-all.mjs)
     └── src/
-        ├── database_planning.md           # PostgreSQL schema & 4-layer DAL blueprint
-        ├── lib/
-        │   ├── types.ts                   # Domain model (mirrors the planned Prisma schema)
-        │   ├── seed.ts                    # Realistic demo organization (dates relative to today)
-        │   ├── store.tsx                  # Client data store + all domain actions & connected engine
-        │   └── utils.ts                   # Dates, payroll/tax maths, hierarchy, metrics, RBAC helpers
-        ├── components/
-        │   ├── AppShell.tsx               # Sidebar, header, global search, notification bell, route guard
-        │   ├── ui.tsx                     # Design-system primitives (Button, Card, Modal, Table, Toast…)
-        │   ├── tasks/TaskComponents.tsx   # Kanban board, task cards, create/detail modals
-        │   ├── org/                       # Org chart, new-hire, offboarding & profile modals
-        │   ├── employee/ClockWidget.tsx   # Clock in/out widget
-        │   ├── Payslip.tsx                # Printable payslip
-        │   ├── PerformanceMetrics.tsx     # Task/attendance-driven review metrics
-        │   ├── NotificationsCenter.tsx    # Inbox + audit log
-        │   └── ProfileDropdown.tsx · ThemeProvider.tsx
-        └── app/
+        ├── lib/                           # Store, types, utils, client synchronizers
+        ├── components/                    # Design-system primitives, modals, widgets
+        └── app/                           # App Router pages and REST API route handlers
+```
             ├── page.tsx                   # Landing page
             ├── (auth)/login · (auth)/signup
             ├── dashboard/                 # Role dispatcher
@@ -444,7 +451,7 @@ docker run -p 3000:3000 -d --name workplace workplace-ems:latest
 
 The frontend currently runs on a client-side store (`frontend/src/lib/store.tsx`) whose actions map 1:1 onto the future API routes and domain services (e.g. `decideLeave` → `LeaveService.approve`, `addEmployee` → onboarding transaction, `generatePayroll` → `PayrollService`). Swapping it for real endpoints only requires replacing the action bodies with `fetch` calls.
 
-As detailed in `frontend/src/database_planning.md`, the platform is designed around a **4-Layer Architecture Pattern**:
+As detailed in `database/database_planning.md`, the platform is designed around a **4-Layer Architecture Pattern**:
 
 1. **Presentation Layer**: Next.js 14 App Router UI components.
 2. **API Route Handlers**: Type-safe REST / Server Action endpoints.

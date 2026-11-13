@@ -1,5 +1,5 @@
 // Domain model for the Workplace EMS frontend.
-// Mirrors the entities described in src/database_planning.md so the UI can be
+// Mirrors the entities described in database/database_planning.md so the UI can be
 // wired to the Prisma/PostgreSQL backend later without reshaping data.
 
 export type Role = "SUPER_ADMIN" | "HR_ADMIN" | "MANAGER" | "EMPLOYEE";

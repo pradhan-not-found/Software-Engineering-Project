@@ -34,7 +34,7 @@ export async function loadFromSupabase(fallbackDB: DB): Promise<DB | null> {
     ]);
 
     if (!emps || emps.length === 0) {
-      console.warn("Supabase connected but tables are empty. Did you run supabase_schema.sql?");
+      console.warn("Supabase connected but tables are empty. Did you run database/schema.sql?");
       return null;
     }
 
