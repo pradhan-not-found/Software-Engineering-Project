@@ -39,7 +39,7 @@
 
 ---
 
-> 📘 **Complete Operator Manual & Demo Lecture Guide**: Looking for a step-by-step walkthrough of every page, operational recipes, and presentation lecture script with diagrams? See [docs/INSTRUCTION_AND_DEMO_GUIDE.md](docs/INSTRUCTION_AND_DEMO_GUIDE.md).
+> 📘 **Complete Operator Manual & Demo Lecture Guide**: Looking for a step-by-step walkthrough of every page, operational recipes, and presentation lecture script with diagrams? See [INSTRUCTION_AND_DEMO_GUIDE.md](INSTRUCTION_AND_DEMO_GUIDE.md).
 
 ---
 
@@ -254,6 +254,7 @@ Data is seeded relative to today's date and saved in your browser. Use **Profile
 Software-Engineering-Project/
 ├── LICENSE
 ├── README.md                              # Main project documentation
+├── INSTRUCTION_AND_DEMO_GUIDE.md          # Complete Operator Manual & Demo Lecture Guide (Top Level)
 ├── docs/                                  # Documentation & presentation guides
 │   ├── INSTRUCTION_AND_DEMO_GUIDE.md      # Complete Operator Manual & Demo Lecture Guide
 │   ├── content.md                         # Feature specification
