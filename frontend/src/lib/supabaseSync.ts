@@ -41,17 +41,21 @@ export async function loadFromSupabase(fallbackDB: DB): Promise<DB | null> {
     const draft = structuredClone(fallbackDB);
 
     if (depts && depts.length > 0) {
-      draft.departments = depts.map((d: any) => ({
+      const supaDepts = depts.map((d: any) => ({
         id: d.id,
         name: d.name,
         code: d.code,
         headId: d.head_id,
         color: d.color || "blue",
       }));
+      const deptMap = new Map<string, any>();
+      for (const d of fallbackDB.departments) deptMap.set(d.id, d);
+      for (const d of supaDepts) deptMap.set(d.id, d);
+      draft.departments = Array.from(deptMap.values());
     }
 
     if (emps && emps.length > 0) {
-      draft.employees = emps.map((e: any) => ({
+      const supaEmps = emps.map((e: any) => ({
         id: e.id,
         code: e.code,
         firstName: e.first_name,
@@ -82,6 +86,34 @@ export async function loadFromSupabase(fallbackDB: DB): Promise<DB | null> {
         bankAccount: e.bank_account || "",
         pan: e.pan || "",
       }));
+
+      // Merge: Seed fallback employees first so no ID is missing, then layer Supabase
+      const empMap = new Map<string, any>();
+      for (const fe of fallbackDB.employees) empMap.set(fe.id, fe);
+      for (const se of supaEmps) {
+        const existing = empMap.get(se.id);
+        empMap.set(se.id, existing ? { ...existing, ...se } : se);
+      }
+
+      // Establish aliases so legacy and cloud keys both resolve to the same real person
+      const aliases: [string, string][] = [
+        ["emp_arjun", "e1"],
+        ["emp_neha", "e2"],
+        ["emp_john", "e5"],
+        ["emp_alice", "e7"],
+        ["e_xf240ecfewx", "e18"],
+      ];
+      for (const [supaId, localId] of aliases) {
+        const localEmp = empMap.get(localId);
+        const supaEmp = empMap.get(supaId);
+        if (localEmp && !supaEmp) {
+          empMap.set(supaId, { ...localEmp, id: supaId });
+        } else if (supaEmp && localEmp) {
+          empMap.set(localId, { ...supaEmp, id: localId });
+        }
+      }
+
+      draft.employees = Array.from(empMap.values());
     }
 
     if (tasks && tasks.length > 0) {
@@ -126,6 +158,34 @@ export async function loadFromSupabase(fallbackDB: DB): Promise<DB | null> {
         decisionComment: l.decision_comment,
         createdAt: l.created_at,
         decidedAt: l.decided_at,
+      }));
+    }
+
+    if (expenses && expenses.length > 0) {
+      draft.expenses = expenses.map((exp: any) => ({
+        id: exp.id,
+        employeeId: exp.employee_id,
+        category: exp.category,
+        amount: Number(exp.amount),
+        date: exp.date,
+        description: exp.description || "",
+        receiptName: exp.receipt_name || undefined,
+        status: exp.status,
+        decidedBy: exp.decided_by,
+        createdAt: exp.created_at,
+      }));
+    }
+
+    if (notifications && notifications.length > 0) {
+      draft.notifications = notifications.map((n: any) => ({
+        id: n.id,
+        recipientId: n.recipient_id,
+        title: n.title,
+        message: n.message,
+        category: n.category,
+        read: n.read,
+        link: n.link,
+        createdAt: n.created_at,
       }));
     }
 
@@ -205,6 +265,17 @@ export async function syncLeaveDecisionToSupabase(leaveId: string, status: "APPR
     }).eq("id", leaveId);
   } catch (e) {
     console.error("Supabase syncLeave error:", e);
+  }
+}
+
+export async function syncExpenseDecisionToSupabase(expenseId: string, status: "APPROVED" | "REJECTED") {
+  if (!isSupabaseConfigured || !supabase) return;
+  try {
+    await supabase.from("expenses").update({
+      status,
+    }).eq("id", expenseId);
+  } catch (e) {
+    console.error("Supabase syncExpense error:", e);
   }
 }
 

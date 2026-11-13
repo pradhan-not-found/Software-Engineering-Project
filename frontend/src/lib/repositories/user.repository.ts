@@ -84,10 +84,17 @@ export class UserRepository {
     // 1. Try Supabase if configured
     if (isSupabaseConfigured && supabase) {
       try {
+        const queryEmail =
+          normalized === "john@workplace.com" ? "rohan@workplace.com" :
+          normalized === "alice@workplace.com" ? "ananya@workplace.com" :
+          normalized === "mike@workplace.com" ? "varun@workplace.com" :
+          normalized;
+
         const { data, error } = await supabase
           .from("employees")
           .select("*")
-          .ilike("email", normalized)
+          .or(`email.ilike.${normalized},email.ilike.${queryEmail}`)
+          .limit(1)
           .maybeSingle();
 
         if (error) {
@@ -102,7 +109,13 @@ export class UserRepository {
 
     // 2. Fallback to local deterministic seed
     const seed = createSeed();
-    const found = seed.employees.find((e) => e.email.toLowerCase() === normalized);
+    const found = seed.employees.find(
+      (e) =>
+        e.email.toLowerCase() === normalized ||
+        (normalized === "john@workplace.com" && (e.id === "e5" || e.id === "emp_john")) ||
+        (normalized === "alice@workplace.com" && (e.id === "e7" || e.id === "emp_alice")) ||
+        (normalized === "mike@workplace.com" && e.id === "e6")
+    );
     return found || null;
   }
 

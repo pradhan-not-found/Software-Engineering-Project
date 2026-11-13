@@ -40,8 +40,8 @@ export const DEMO_PASSWORD = "demo1234";
 export const DEMO_ACCOUNTS: { label: string; email: string; role: Role; description: string }[] = [
   { label: "Super Admin", email: "arjun@workplace.com", role: "SUPER_ADMIN", description: "Arjun Mehta · CEO" },
   { label: "HR Admin", email: "neha@workplace.com", role: "HR_ADMIN", description: "Neha Kapoor · HR Director" },
-  { label: "Manager", email: "john@workplace.com", role: "MANAGER", description: "John Doe · Frontend Lead" },
-  { label: "Employee", email: "alice@workplace.com", role: "EMPLOYEE", description: "Alice Smith · Product Designer" },
+  { label: "Manager", email: "rohan@workplace.com", role: "MANAGER", description: "Rohan Sharma · Frontend Lead" },
+  { label: "Employee", email: "ananya@workplace.com", role: "EMPLOYEE", description: "Ananya Verma · Product Designer" },
 ];
 
 export function defaultColumns(prefix: string): BoardColumn[] {
@@ -98,9 +98,9 @@ export function createSeed(): DB {
     { id: "e2", firstName: "Neha", lastName: "Kapoor", email: "neha@workplace.com", role: "HR_ADMIN", designation: "HR Director", departmentId: "d_people", managerId: "e1", joiningDate: "2019-09-15", status: "ACTIVE", gender: "Female", basic: 140000, skills: ["Talent Acquisition", "Compliance", "L&D"] },
     { id: "e3", firstName: "Vikram", lastName: "Iyer", email: "vikram@workplace.com", role: "MANAGER", designation: "VP of Engineering", departmentId: "d_eng", managerId: "e1", joiningDate: "2020-01-06", status: "ACTIVE", gender: "Male", basic: 200000, skills: ["Architecture", "Go", "Kubernetes"] },
     { id: "e4", firstName: "Sarah", lastName: "Jenkins", email: "sarah@workplace.com", role: "MANAGER", designation: "VP of Marketing", departmentId: "d_mkt", managerId: "e1", joiningDate: "2020-06-01", status: "ACTIVE", gender: "Female", basic: 180000, skills: ["Brand", "Growth", "Content"] },
-    { id: "e5", firstName: "John", lastName: "Doe", email: "john@workplace.com", role: "MANAGER", designation: "Frontend Lead", departmentId: "d_eng", managerId: "e3", joiningDate: "2021-02-15", status: "ACTIVE", gender: "Male", basic: 130000, skills: ["React", "Next.js", "TypeScript", "Design Systems"], workMode: "Hybrid" },
-    { id: "e6", firstName: "Mike", lastName: "Ross", email: "mike@workplace.com", role: "EMPLOYEE", designation: "DevOps Engineer", departmentId: "d_eng", managerId: "e3", joiningDate: "2021-08-02", status: "ON_LEAVE", gender: "Male", basic: 95000, skills: ["AWS", "Terraform", "CI/CD"] },
-    { id: "e7", firstName: "Alice", lastName: "Smith", email: "alice@workplace.com", role: "EMPLOYEE", designation: "Product Designer", departmentId: "d_design", managerId: "e5", joiningDate: "2022-03-14", status: "ACTIVE", gender: "Female", basic: 85000, skills: ["Figma", "UX Research", "Prototyping"], workMode: "Hybrid" },
+    { id: "e5", firstName: "Rohan", lastName: "Sharma", email: "rohan@workplace.com", role: "MANAGER", designation: "Frontend Lead", departmentId: "d_eng", managerId: "e3", joiningDate: "2021-02-15", status: "ACTIVE", gender: "Male", basic: 130000, skills: ["React", "Next.js", "TypeScript", "Design Systems"], workMode: "Hybrid" },
+    { id: "e6", firstName: "Varun", lastName: "Nair", email: "varun@workplace.com", role: "EMPLOYEE", designation: "DevOps Engineer", departmentId: "d_eng", managerId: "e3", joiningDate: "2021-08-02", status: "ON_LEAVE", gender: "Male", basic: 95000, skills: ["AWS", "Terraform", "CI/CD"] },
+    { id: "e7", firstName: "Ananya", lastName: "Verma", email: "ananya@workplace.com", role: "EMPLOYEE", designation: "Product Designer", departmentId: "d_design", managerId: "e5", joiningDate: "2022-03-14", status: "ACTIVE", gender: "Female", basic: 85000, skills: ["Figma", "UX Research", "Prototyping"], workMode: "Hybrid" },
     { id: "e8", firstName: "Robert", lastName: "Chen", email: "robert@workplace.com", role: "EMPLOYEE", designation: "Data Scientist", departmentId: "d_data", managerId: "e9", joiningDate: "2022-07-11", status: "ACTIVE", gender: "Male", basic: 105000, skills: ["Python", "ML", "SQL"], workMode: "Remote" },
     { id: "e9", firstName: "Ananya", lastName: "Ghosh", email: "ananya@workplace.com", role: "MANAGER", designation: "Head of Data", departmentId: "d_data", managerId: "e1", joiningDate: "2020-11-02", status: "ACTIVE", gender: "Female", basic: 160000, skills: ["Analytics", "BI", "Statistics"] },
     { id: "e10", firstName: "Rahul", lastName: "Verma", email: "rahul@workplace.com", role: "EMPLOYEE", designation: "Frontend Engineer", departmentId: "d_eng", managerId: "e5", joiningDate: "2023-01-09", status: "ACTIVE", gender: "Male", basic: 75000, skills: ["React", "CSS", "Testing"] },
@@ -111,6 +111,7 @@ export function createSeed(): DB {
     { id: "e15", firstName: "Aman", lastName: "Gupta", email: "aman@workplace.com", role: "MANAGER", designation: "Finance Manager", departmentId: "d_fin", managerId: "e1", joiningDate: "2020-03-16", status: "ACTIVE", gender: "Male", basic: 120000, skills: ["Accounting", "Tax", "FP&A"] },
     { id: "e16", firstName: "Sneha", lastName: "Roy", email: "sneha@workplace.com", role: "EMPLOYEE", designation: "QA Engineer", departmentId: "d_eng", managerId: "e5", joiningDate: addDays(t, -3), status: "ONBOARDING", gender: "Female", basic: 60000, skills: ["Playwright", "Manual Testing"] },
     { id: "e17", firstName: "Karan", lastName: "Malhotra", email: "karan@workplace.com", role: "EMPLOYEE", designation: "Accountant", departmentId: "d_fin", managerId: "e15", joiningDate: "2022-10-10", status: "OFFBOARDING", gender: "Male", basic: 58000, skills: ["Tally", "GST"] },
+    { id: "e18", firstName: "Soubhik", lastName: "Dutta", email: "soubhik@workplace.com", role: "EMPLOYEE", designation: "Associate Marketing Specialist", departmentId: "d_mkt", managerId: "e4", joiningDate: "2024-10-01", status: "ACTIVE", gender: "Male", basic: 62000, skills: ["SEO", "Content Strategy", "Social Media Analytics"] },
   ];
 
   const cities = ["Kolkata", "Bengaluru", "Mumbai", "Pune", "Hyderabad", "Delhi"];
@@ -307,8 +308,8 @@ export function createSeed(): DB {
 
   // Personal to-dos
   boards.push(
-    { id: "b_personal_e7", title: "Alice's To-Dos", type: "PERSONAL", projectId: null, ownerId: "e7", columns: defaultColumns("b_personal_e7"), createdAt: iso(addDays(t, -30)) },
-    { id: "b_personal_e5", title: "John's To-Dos", type: "PERSONAL", projectId: null, ownerId: "e5", columns: defaultColumns("b_personal_e5"), createdAt: iso(addDays(t, -30)) },
+    { id: "b_personal_e7", title: "Ananya's To-Dos", type: "PERSONAL", projectId: null, ownerId: "e7", columns: defaultColumns("b_personal_e7"), createdAt: iso(addDays(t, -30)) },
+    { id: "b_personal_e5", title: "Rohan's To-Dos", type: "PERSONAL", projectId: null, ownerId: "e5", columns: defaultColumns("b_personal_e5"), createdAt: iso(addDays(t, -30)) },
   );
   mkTask("b_personal_e7", "todo", "Daily stand-up notes", ["e7"], "e7", "LOW", 0, { recurrence: "DAILY" });
   mkTask("b_personal_e7", "todo", "Submit weekly timesheet", ["e7"], "e7", "MEDIUM", 2, { recurrence: "WEEKLY" });
@@ -383,9 +384,9 @@ export function createSeed(): DB {
       status: stage === 0 ? "PENDING_SELF" : stage === 1 ? "PENDING_MANAGER" : "COMPLETED",
     });
   });
-  // Make sure demo employee Alice has a pending self review.
-  const aliceRv = reviews.find((r) => r.id === "rv2_e7");
-  if (aliceRv) Object.assign(aliceRv, { selfRating: null, selfComment: "", managerRating: null, managerComment: "", peerFeedback: [], status: "PENDING_SELF" });
+  // Make sure demo employee Ananya has a pending self review.
+  const ananyaRv = reviews.find((r) => r.id === "rv2_e7");
+  if (ananyaRv) Object.assign(ananyaRv, { selfRating: null, selfComment: "", managerRating: null, managerComment: "", peerFeedback: [], status: "PENDING_SELF" });
 
   /* ------------------------------ Timesheets ---------------------------- */
   const lastWeek = startOfWeek(addDays(t, -7));
@@ -401,13 +402,13 @@ export function createSeed(): DB {
     id, recipientId, title, message, category, read, link, createdAt: new Date(Date.now() - hoursAgo * 3600000).toISOString(),
   });
   const notifications: Notification[] = [
-    n("n1", "e7", "Task assigned", "John Doe assigned you to “Design system audit”.", "WORK", 20, "/employee/tasks"),
-    n("n2", "e7", "Leave approved", "Your sick leave was approved by John Doe.", "HR", 24 * 20, "/employee/leaves", true),
+    n("n1", "e7", "Task assigned", "Rohan Sharma assigned you to “Design system audit”.", "WORK", 20, "/employee/tasks"),
+    n("n2", "e7", "Leave approved", "Your sick leave was approved by Rohan Sharma.", "HR", 24 * 20, "/employee/leaves", true),
     n("n3", "e7", "Review cycle started", `H2 ${year} Review is open — submit your self-assessment.`, "HR", 30, "/employee/performance"),
     n("n4", "e5", "Leave request", "Rahul Verma requested 3 days of Annual Leave.", "HR", 22, "/employee/team"),
     n("n5", "e5", "New joiner", "Sneha Roy joined your team. Onboarding board created.", "HR", 72, "/employee/tasks"),
     n("n6", "e5", "Deadline near", "“Leave request form validation” is due today.", "WORK", 5, "/employee/tasks"),
-    n("n7", "e3", "Tasks delayed", "Mike Ross is on leave — 2 active tasks flagged “Delayed — On Leave”.", "WORK", 48, "/admin/projects"),
+    n("n7", "e3", "Tasks delayed", "Varun Nair is on leave — 2 active tasks flagged “Delayed — On Leave”.", "WORK", 48, "/admin/projects"),
     n("n8", "e2", "Pending approvals", "3 leave requests and 3 expense claims are waiting for review.", "HR", 3, "/admin/leaves"),
     n("n9", "e1", "Payroll ready", `Payroll for ${monthStr(0)} can now be generated.`, "SYSTEM", 6, "/admin/payroll"),
     n("n10", "e2", "Offboarding", "Karan Malhotra's exit checklist is 2/6 complete.", "HR", 26, "/admin/onboarding"),
@@ -420,12 +421,12 @@ export function createSeed(): DB {
     a("a1", "e12", "CREATE", "LeaveRequest", "Emily Watson requested 1 day of Sick Leave.", "HR", 2),
     a("a2", "e13", "CREATE", "Expense", "Daniel Park submitted an expense claim of ₹2,300.", "HR", 48),
     a("a3", "e10", "CREATE", "LeaveRequest", "Rahul Verma requested 3 days of Annual Leave.", "HR", 22),
-    a("a4", null, "SYSTEM", "Task", "2 tasks assigned to Mike Ross flagged “Delayed — On Leave”.", "WORK", 240),
-    a("a5", "e3", "APPROVE", "LeaveRequest", "Vikram Iyer approved Mike Ross's Annual Leave.", "HR", 240),
+    a("a4", null, "SYSTEM", "Task", "2 tasks assigned to Varun Nair flagged “Delayed — On Leave”.", "WORK", 240),
+    a("a5", "e3", "APPROVE", "LeaveRequest", "Vikram Iyer approved Varun Nair's Annual Leave.", "HR", 240),
     a("a6", null, "SYSTEM", "Board", "Onboarding board auto-generated for Sneha Roy (6 tasks).", "WORK", 72),
     a("a7", "e2", "CREATE", "Employee", "Neha Kapoor added Sneha Roy (QA Engineer) to Engineering.", "HR", 72),
     a("a8", "e2", "UPDATE", "Employee", "Neha Kapoor initiated offboarding for Karan Malhotra.", "HR", 26),
-    a("a9", "e5", "UPDATE", "Task", "John Doe moved “Org chart component” to Done.", "WORK", 200),
+    a("a9", "e5", "UPDATE", "Task", "Rohan Sharma moved “Org chart component” to Done.", "WORK", 200),
     a("a10", "e1", "UPDATE", "PayrollRun", `Arjun Mehta marked payroll for ${monthStr(-1)} as paid.`, "SYSTEM", 24 * 8),
   ];
 

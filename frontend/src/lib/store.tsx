@@ -45,6 +45,7 @@ import {
   syncEmployeeToSupabase,
   syncTaskToSupabase,
   syncLeaveDecisionToSupabase,
+  syncExpenseDecisionToSupabase,
 } from "./supabaseSync";
 import {
   addDays,
@@ -317,7 +318,14 @@ function useStoreValue() {
       // 2. Local memory fallback
       const d = dbRef.current;
       if (!d) return { ok: false, error: "App is still loading." };
-      const e = d.employees.find((x) => x.email.toLowerCase() === email.trim().toLowerCase());
+      const normalized = email.trim().toLowerCase();
+      const e = d.employees.find(
+        (x) =>
+          x.email.toLowerCase() === normalized ||
+          (normalized === "john@workplace.com" && (x.id === "e5" || x.id === "emp_john")) ||
+          (normalized === "alice@workplace.com" && (x.id === "e7" || x.id === "emp_alice")) ||
+          (normalized === "mike@workplace.com" && x.id === "e6")
+      );
       if (!e || e.password !== password) return { ok: false, error: "Invalid email or password." };
       if (e.accountStatus === "SUSPENDED" || e.status === "TERMINATED")
         return { ok: false, error: "This account has been suspended. Contact your HR administrator." };
@@ -1333,6 +1341,10 @@ function useStoreValue() {
           },
           body: JSON.stringify({ status: approve ? "APPROVED" : "REJECTED" }),
         }).catch((err) => console.error("API decide expense error:", err));
+
+        if (isSupabaseConfigured) {
+          syncExpenseDecisionToSupabase(id, approve ? "APPROVED" : "REJECTED");
+        }
 
         return { ok: true, data: x };
       });
