@@ -22,19 +22,24 @@
 ## 📌 Table of Contents
 1. [Overview & Project Aim](#-overview--project-aim)
 2. [Team Members & Stakeholders](#-team-members--stakeholders)
-3. [Architecture & Diagrammatic Flows](#-architecture--diagrammatic-flows)
+3. [Operator Manual & Lecture Demo Guide (docs/INSTRUCTION_AND_DEMO_GUIDE.md)](#-operator-manual--demo-guide)
+4. [Architecture & Diagrammatic Flows](#-architecture--diagrammatic-flows)
    - [System Context & Architecture Flow](#1-system-context--architecture-flow)
    - [Software User Journey Flow](#2-software-user-journey-flow)
    - [Connected Wedge — Reactive Event Flow](#3-connected-wedge--reactive-event-flow)
-4. [Feature Breakdown](#-feature-breakdown)
+5. [Feature Breakdown](#-feature-breakdown)
    - [Core Common HR Features (Table Stakes)](#41-core-common-hr-features-table-stakes)
    - [Work Management & Connected Features (The Wedge)](#42-work-management--connected-differentiator-features-the-wedge)
    - [Demo Accounts](#43-demo-accounts)
-5. [Repository Structure](#-repository-structure)
-6. [Getting Started on Localhost](#-getting-started-on-localhost)
-7. [Making It Live (Production Deployment)](#-making-it-live-production-deployment)
-8. [Database & Backend Roadmap](#-database--backend-roadmap)
-9. [License & Acknowledgments](#-license--acknowledgments)
+6. [Repository Structure](#-repository-structure)
+7. [Getting Started on Localhost](#-getting-started-on-localhost)
+8. [Making It Live (Production Deployment)](#-making-it-live-production-deployment)
+9. [Database & Backend Roadmap](#-database--backend-roadmap)
+10. [License & Acknowledgments](#-license--acknowledgments)
+
+---
+
+> 📘 **Complete Operator Manual & Demo Lecture Guide**: Looking for a step-by-step walkthrough of every page, operational recipes, and presentation lecture script with diagrams? See [docs/INSTRUCTION_AND_DEMO_GUIDE.md](docs/INSTRUCTION_AND_DEMO_GUIDE.md).
 
 ---
 
@@ -249,7 +254,8 @@ Data is seeded relative to today's date and saved in your browser. Use **Profile
 Software-Engineering-Project/
 ├── LICENSE
 ├── README.md                              # Main project documentation
-├── docs/                                  # Academic & project specifications
+├── docs/                                  # Documentation & presentation guides
+│   ├── INSTRUCTION_AND_DEMO_GUIDE.md      # Complete Operator Manual & Demo Lecture Guide
 │   ├── content.md                         # Feature specification
 │   ├── data.txt                           # Benchmark data
 │   └── project_overview.tex               # LaTeX academic documentation
@@ -259,7 +265,7 @@ Software-Engineering-Project/
 │   ├── supabase_schema.sql                # Supabase schema with RLS & extensions
 │   ├── database_planning.md               # PostgreSQL schema & 4-layer DAL blueprint
 │   └── scripts/                           # Database automation scripts
-│       ├── seed-supabase.mjs              # Live cloud database seeder (18 employees, pending queues)
+│       ├── seed-supabase.mjs              # Live cloud database seeder (26 employees across 12 depts, pending queues)
 │       └── check-supabase.mjs             # Database health, counts & integrity auditor
 ├── backend/                               # Dedicated 4-Layer Domain & Service Architecture
 │   ├── package.json · tsconfig.json · README.md
